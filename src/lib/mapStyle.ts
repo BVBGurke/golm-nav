@@ -1,6 +1,6 @@
 /**
- * Basemap: CARTO "dark matter" raster tiles over OpenStreetMap data.
- * No API key, no account. Attribution stays on the map.
+ * Grundkarte: CARTO „dark matter“ als Rasterkacheln über OpenStreetMap-Daten.
+ * Kein Schlüssel, kein Konto. Die Namensnennung bleibt auf der Karte stehen.
  */
 export const BASEMAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 

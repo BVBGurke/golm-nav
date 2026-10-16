@@ -32,12 +32,13 @@ interface OrientationEvent extends DeviceOrientationEvent {
 }
 
 /**
- * Live position + heading.
+ * Standort und Blickrichtung in Echtzeit.
  *
- * Headings come from three sources, in order of reliability: the GPS course
- * while moving, `deviceorientationabsolute`, and the plain `deviceorientation`
- * event with iOS' `webkitCompassHeading`. iOS needs a user gesture for the
- * permission prompt, so `enable()` must be called from a click.
+ * Peilungen kommen aus drei Quellen, nach Verlässlichkeit sortiert: der
+ * GPS-Kurs während der Bewegung, `deviceorientationabsolute` und das einfache
+ * `deviceorientation`-Ereignis mit iOS' `webkitCompassHeading`. iOS verlangt
+ * für die Abfrage eine Nutzerhandlung, deshalb muss `enable()` aus einem Klick
+ * kommen.
  */
 export function useLiveLocation() {
   const [state, setState] = useState<LocationState>(INITIAL)

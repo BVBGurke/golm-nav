@@ -4,8 +4,6 @@ import type { CSSProperties, ReactNode } from 'react'
 import { KINDS } from '@/lib/kinds'
 import type { PoiKind } from '@/types'
 
-export const WALK_SPEED = 1.42
-
 /* ------------------------------------------------------------------ icons */
 
 export function Icon({
@@ -57,7 +55,7 @@ export const ICONS = {
 
 /* ------------------------------------------------------------------ kinds */
 
-export function KindIcon({ kind, size = 16, className }: { kind: PoiKind; size?: number; className?: string }) {
+function KindIcon({ kind, size = 16, className }: { kind: PoiKind; size?: number; className?: string }) {
   return <Icon path={KINDS[kind].icon} size={size} className={className} strokeWidth={1.7} />
 }
 
@@ -165,42 +163,6 @@ export function Notice({
           {actionLabel}
         </button>
       )}
-    </div>
-  )
-}
-
-/** Segmentwahl: ein Feld mit gleitender Fläche statt einer Knopfreihe. */
-export function SegmentRow({
-  options,
-  value,
-  onChange,
-  disabled,
-}: {
-  options: { value: string; label: string; disabled?: boolean; hint?: string }[]
-  value: string
-  onChange: (value: string) => void
-  disabled?: boolean
-}) {
-  return (
-    <div className="inline-flex border border-line-2" role="group">
-      {options.map((option) => {
-        const active = option.value === value
-        const off = disabled || option.disabled
-        return (
-          <button
-            key={option.value}
-            type="button"
-            disabled={off}
-            onClick={() => !off && onChange(option.value)}
-            title={option.hint}
-            className={`px-2.5 py-1 text-[12px] transition-colors disabled:opacity-40 ${
-              active ? 'bg-white/12 text-ink' : 'text-ink-3 enabled:hover:text-ink-2'
-            }`}
-          >
-            {option.label}
-          </button>
-        )
-      })}
     </div>
   )
 }

@@ -63,12 +63,12 @@ function turnKind(delta: number): Turn {
 }
 
 /**
- * Reduce an ordered coordinate list into navigation steps.
+ * Aus einer Koordinatenfolge werden die Navigationsschritte.
  *
- * Real footpath data is noisy: a single junction often shows up as several
- * consecutive bearing changes. Decisions that sit within JUNCTION_MERGE metres
- * of each other are collapsed to the strongest one, which keeps the instruction
- * list readable without losing the actual manoeuvre.
+ * Echte Fußwegdaten sind unscharf: eine einzelne Kreuzung erscheint oft als
+ * mehrere Peilungswechsel hintereinander. Entscheidungen, die weniger als
+ * JUNCTION_MERGE Meter auseinanderliegen, fallen zur stärksten zusammen. Die
+ * Hinweisliste bleibt lesbar, ohne die eigentliche Abbiegung zu verlieren.
  */
 function buildSteps(path: LatLng[], roadAt: (index: number) => string | undefined): RouteStep[] {
   const cum = cumulative(path)
@@ -150,8 +150,8 @@ export interface Guidance {
 }
 
 /**
- * What the walker should do next. Distance counts down to the coming manoeuvre
- * and flips to the following one as soon as it is reached.
+ * Was als Nächstes zu tun ist. Der Abstand zählt bis zur kommenden Abbiegung
+ * herunter und springt danach auf die folgende um.
  */
 export function guidance(route: Route, travelled: number): Guidance {
   const nextIndex = route.steps.findIndex((s) => s.atDistance > travelled + 4)
@@ -228,8 +228,8 @@ export function routeTo(campus: Campus, from: LatLng, to: Poi, fromNode?: number
 }
 
 /**
- * Lateral offset of a point from the route, in metres. Negative is left of the
- * walking direction. Also reports how far along the route the projection sits.
+ * Seitlicher Abstand eines Punkts von der Route, in Metern. Negativ ist links
+ * der Gehrichtung. Dazu kommt, wie weit entlang der Route die Projektion liegt.
  */
 export function lateralOffset(point: LatLng, path: LatLng[]): { offset: number; distanceAlong: number } {
   let best = Infinity

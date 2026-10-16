@@ -1,21 +1,22 @@
+import { WALK_SPEED } from '@/lib/walk'
 import type { LatLng } from '@/types'
 import { M_PER_DEG_LAT, distance } from './geo'
 
 /**
- * Routing graph over the OSM footpath network.
+ * Routing-Graph über das Fußwegenetz aus OpenStreetMap.
  *
- * The data set carries ~3.4 k nodes and ~3.8 k edges, so a binary heap A* with
- * a straight-line heuristic answers a campus query in well under a millisecond.
- * Everything runs in the browser; no routing service, no API key.
+ * Der Datensatz hat rund 3400 Knoten und 3800 Kanten; A* mit Binärheap und
+ * Luftlinien-Heuristik beantwortet eine Campus-Anfrage in deutlich unter einer
+ * Millisekunde. Alles läuft im Browser, ohne Routing-Dienst und ohne Schlüssel.
  */
 export class WalkGraph {
   readonly coords: LatLng[]
   private readonly offsets: Int32Array
   private readonly targets: Int32Array
   private readonly weights: Float64Array
-  private readonly cell = 0.0022 // ≈ 245 m index buckets
+  private readonly cell = 0.0022 // Kachelkante ≈ 245 m
   private readonly grid = new Map<number, number[]>()
-  private readonly maxSpeed = 1.42 // m/s, average walking pace
+  private readonly maxSpeed = WALK_SPEED
 
   constructor(coords: LatLng[], edges: [number, number, number][]) {
     this.coords = coords
@@ -49,7 +50,7 @@ export class WalkGraph {
     return i * 65536 + j
   }
 
-  /** Nearest graph node to a coordinate, or -1 when nothing is within maxM. */
+  /** Nächster Wegeknoten zu einer Koordinate, -1 wenn keiner näher als maxM liegt. */
   nearest(point: LatLng, maxM = 250): number {
     const i = Math.floor(point[0] / this.cell) + 4096
     const j = Math.floor(point[1] / this.cell) + 8192
@@ -75,7 +76,7 @@ export class WalkGraph {
     return best
   }
 
-  /** Shortest path between two coordinates. Returns null if either end is off-graph. */
+  /** Kürzester Weg zwischen zwei Koordinaten; null, wenn ein Ende abseits liegt. */
   route(from: LatLng, to: LatLng, maxSnap = 300): number[] | null {
     const start = this.nearest(from, maxSnap)
     const goal = this.nearest(to, maxSnap)
@@ -93,9 +94,9 @@ export class WalkGraph {
     prev.fill(-1)
     closed.fill(0)
 
-    /* Straight-line metres to the goal. The graph weights are already metres, so
-       the heuristic must be too — scaling here by anything else makes A* expand
-       the wrong nodes and return a detour instead of the shortest path. */
+    /* Luftlinie zum Ziel in Metern. Die Kantengewichte sind schon Meter, die
+       Heuristik muss es also auch sein: jeder andere Faktor lässt A* die
+       falschen Knoten aufklappen und einen Umweg zurückgeben. */
     const goalCoord = this.coords[goal]
     const scaleLon = Math.cos((goalCoord[0] * Math.PI) / 180)
     const heuristic = (i: number) => {
@@ -133,7 +134,7 @@ export class WalkGraph {
     return path.reverse()
   }
 
-  /** Walking distance along a node path, in metres. */
+  /** Fußweg entlang eines Knotenpfads, in Metern. */
   pathLength(path: number[]): number {
     let total = 0
     for (let i = 1; i < path.length; i++) total += distance(this.coords[path[i - 1]], this.coords[path[i]])

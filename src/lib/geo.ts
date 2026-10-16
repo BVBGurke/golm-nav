@@ -7,14 +7,14 @@ export function metresPerDegLon(lat: number): number {
   return M_PER_DEG_LAT * Math.cos(lat * RAD)
 }
 
-/** Planar distance in metres. Good to ~0.1 % across a 3 km campus. */
+/** Planare Distanz in Metern; auf 3 km Campus gut auf 0,1 %. */
 export function distance(a: LatLng, b: LatLng): number {
   const dy = (a[0] - b[0]) * M_PER_DEG_LAT
   const dx = (a[1] - b[1]) * metresPerDegLon((a[0] + b[0]) / 2)
   return Math.hypot(dx, dy)
 }
 
-/** Initial great-circle bearing in degrees. */
+/** Anfangspeilung auf dem Großkreis, in Grad. */
 export function bearing(a: LatLng, b: LatLng): number {
   const lat1 = a[0] * RAD
   const lat2 = b[0] * RAD
@@ -24,7 +24,7 @@ export function bearing(a: LatLng, b: LatLng): number {
   return (Math.atan2(y, x) / RAD + 360) % 360
 }
 
-/** Shortest signed difference between two bearings, in (-180, 180]. */
+/** Kürzeste vorzeichenbehaftete Differenz zweier Peilungen, in (-180, 180]. */
 export function bearingDelta(from: number, to: number): number {
   let d = (to - from + 540) % 360 - 180
   if (d === -180) d = 180
@@ -42,7 +42,7 @@ export function compassShort(deg: number): string {
   return COMPASS_SHORT[Math.round(((deg % 360) + 360) % 360 / 45) % 8]
 }
 
-/** Distance from point p to segment a-b, in metres. */
+/** Abstand von Punkt p zur Strecke a-b, in Metern. */
 export function distanceToSegment(p: LatLng, a: LatLng, b: LatLng): number {
   const k = metresPerDegLon((p[0] + a[0] + b[0]) / 3) / M_PER_DEG_LAT
   const px = p[1] * k
@@ -69,7 +69,7 @@ export function distanceToPath(p: LatLng, path: LatLng[]): number {
   return best
 }
 
-/** Cumulative metres along a polyline. */
+/** Aufsummierte Meter entlang eines Streckenzugs. */
 export function cumulative(path: LatLng[]): number[] {
   const cum = [0]
   for (let i = 1; i < path.length; i++) cum.push(cum[i - 1] + distance(path[i - 1], path[i]))
@@ -81,8 +81,8 @@ export function interpolate(a: LatLng, b: LatLng, t: number): LatLng {
 }
 
 /**
- * Position at `m` metres along the path, walking backwards from the end when
- * `fromEnd` is set. Used to keep the "next turn" marker glued to the route.
+ * Punkt `m` Meter entlang des Wegs, von hinten gezählt wenn `fromEnd` gesetzt
+ * ist. Damit bleibt die Marke der nächsten Abbiegung an der Route kleben.
  */
 export function pointAtDistance(path: LatLng[], cum: number[], m: number): { point: LatLng; index: number } {
   if (path.length === 0) return { point: [0, 0], index: 0 }

@@ -9,8 +9,9 @@ import StatusMark from '@/bits/StatusMark'
 import { formatDistance } from '@/lib/geo'
 import { KINDS, KIND_ORDER } from '@/lib/kinds'
 import { decisionCount, guidance, upcomingSteps } from '@/lib/routing'
+import { WALK_SPEED } from '@/lib/walk'
 import type { Poi, PoiKind, Route } from '@/types'
-import { ICONS, Icon, KindDot, Notice, ProgressLine, Reading, Row, SectionHead, WALK_SPEED } from './ui'
+import { ICONS, Icon, KindDot, Notice, ProgressLine, Reading, Row, SectionHead } from './ui'
 
 /** Weitwinkel, Normal, Fern — dieselben Stufen wie die Zoomknöpfe der Karte. */
 export const ZOOM_STEPS = [

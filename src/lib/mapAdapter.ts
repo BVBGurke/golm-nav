@@ -1,9 +1,9 @@
 import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 
 /**
- * The installed maplibre-gl build ships class-based exports, and the accessors
- * below are typed loosely in some versions. One adapter keeps the strictness in
- * a single file instead of scattering casts.
+ * Das installierte maplibre-gl liefert klassenbasierte Exporte, und die
+ * Zugriffe unten sind je nach Version locker typisiert. Ein Adapter hält die
+ * Strenge an einer Stelle, statt Typumwandlungen überall zu verteilen.
  */
 export function source(instance: MapLibreMap, id: string): GeoJSONSource {
   return instance.getSource(id) as GeoJSONSource
