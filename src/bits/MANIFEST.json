@@ -1,0 +1,76 @@
+{
+  "source": "reactbits.dev registry (reactbits.dev/r/<Name>-TS-TW.json)",
+  "license": "MIT / open source — see reactbits.dev",
+  "components": [
+    {
+      "name": "Silk",
+      "deps": [],
+      "bytes": 21437
+    },
+    {
+      "name": "SplitText",
+      "deps": [
+        "gsap@^3.13.0",
+        "@gsap/react@^2.1.2"
+      ],
+      "bytes": 14714
+    },
+    {
+      "name": "ShinyText",
+      "deps": [],
+      "bytes": 12963
+    },
+    {
+      "name": "CountUp",
+      "deps": [
+        "motion@^12.23.12"
+      ],
+      "bytes": 17062
+    },
+    {
+      "name": "SpotlightCard",
+      "deps": [],
+      "bytes": 12423
+    },
+    {
+      "name": "GlareHover",
+      "deps": [],
+      "bytes": 11287
+    },
+    {
+      "name": "Magnet",
+      "deps": [],
+      "bytes": 9205
+    },
+    {
+      "name": "AnimatedList",
+      "deps": [
+        "@hugeicons/react@^1.1.10",
+        "@hugeicons/core-free-icons@^4.3.3"
+      ],
+      "bytes": 25521
+    },
+    {
+      "name": "LatticeLoader",
+      "deps": [],
+      "bytes": 11312
+    },
+    {
+      "name": "GlassSurface",
+      "deps": [],
+      "bytes": 36512
+    },
+    {
+      "name": "PillNav",
+      "deps": [],
+      "bytes": 37305
+    },
+    {
+      "name": "ScrollReveal",
+      "deps": [
+        "gsap@^3.13.0"
+      ],
+      "bytes": 10719
+    }
+  ]
+}

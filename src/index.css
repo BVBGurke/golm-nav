@@ -1,0 +1,150 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink-950: #030814;
+  --color-ink-900: #061127;
+  --color-ink-800: #0a1b3a;
+  --color-ink-700: #123055;
+  --color-up-600: #00386b;
+  --color-up-500: #0a5aa8;
+  --color-up-400: #2b86d9;
+  --color-up-300: #7cc0f2;
+  --color-accent-500: #f2b230;
+  --color-accent-400: #ffc95c;
+  --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-ink-950);
+    color: #eaf2ff;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  ::selection {
+    background: var(--color-up-400);
+    color: #041020;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-up-400) 35%, transparent);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--color-up-400) 60%, transparent);
+    background-clip: content-box;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent-400);
+    outline-offset: 2px;
+  }
+}
+
+@utility glass-panel {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-ink-800) 78%, transparent),
+    color-mix(in srgb, var(--color-ink-950) 88%, transparent)
+  );
+  backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid color-mix(in srgb, var(--color-up-400) 22%, transparent);
+  box-shadow:
+    0 24px 60px -30px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent);
+}
+
+@utility text-balance-tight {
+  text-wrap: balance;
+}
+
+/* MapLibre ------------------------------------------------------------- */
+.maplibregl-ctrl-group {
+  background: color-mix(in srgb, var(--color-ink-900) 82%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--color-up-400) 25%, transparent) !important;
+  backdrop-filter: blur(14px);
+  border-radius: 14px !important;
+  overflow: hidden;
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid color-mix(in srgb, var(--color-up-400) 20%, transparent) !important;
+}
+
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(1) hue-rotate(180deg) brightness(1.4);
+}
+
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-attrib a {
+  background: color-mix(in srgb, var(--color-ink-950) 70%, transparent) !important;
+  color: #9db6d6 !important;
+  font-size: 10px;
+}
+
+.maplibregl-popup-content {
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: color-mix(in srgb, var(--color-ink-900) 90%, transparent) !important;
+}
+
+.maplibregl-canvas:focus {
+  outline: none;
+}
+
+@keyframes golm-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.golm-user-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-accent-400) 70%, transparent);
+  animation: golm-pulse 2.4s ease-out infinite;
+}
+
+@keyframes golm-dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+.golm-route-dash {
+  animation: golm-dash 3.2s linear infinite;
+}

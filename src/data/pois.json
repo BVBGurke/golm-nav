@@ -1,0 +1,894 @@
+{
+ "meta": {
+  "source": "OpenStreetMap contributors (ODbL)",
+  "generated": "2026-10-16",
+  "kinds": {
+   "uni": "Universität",
+   "wohnen": "Wohnen",
+   "forschen": "Forschung",
+   "essen": "Essen & Trinken",
+   "lernen": "Lernen & Bibliothek",
+   "sport": "Sport",
+   "service": "Service",
+   "verkehr": "Verkehr",
+   "sonstiges": "Sonstiges"
+  },
+  "count": 51
+ },
+ "pois": [
+  {
+   "id": "p1942211607",
+   "name": "Bahnhof Golm",
+   "short": "Bahnhof Golm",
+   "kind": "verkehr",
+   "house": "",
+   "alias": "",
+   "c": [
+    52.40868,
+    12.97716
+   ],
+   "node": 338,
+   "building": 0,
+   "street": "",
+   "area": 0,
+   "search": "bahnhof golm bahnhof golm verkehr verkehr"
+  },
+  {
+   "id": "b637575159",
+   "name": "BaseCamp Haus 1",
+   "short": "BaseCamp Haus 1",
+   "kind": "wohnen",
+   "house": "1",
+   "alias": "",
+   "c": [
+    52.41051,
+    12.96626
+   ],
+   "node": 1601,
+   "building": 637575159,
+   "street": "Kossätenweg",
+   "area": 645,
+   "search": "basecamp haus 1 basecamp haus 1 haus 1 1 kossätenweg wohnen wohnen"
+  },
+  {
+   "id": "b705786134",
+   "name": "BaseCamp Haus 2",
+   "short": "BaseCamp Haus 2",
+   "kind": "wohnen",
+   "house": "2",
+   "alias": "",
+   "c": [
+    52.41047,
+    12.96665
+   ],
+   "node": 65,
+   "building": 705786134,
+   "street": "Kossätenweg",
+   "area": 646,
+   "search": "basecamp haus 2 basecamp haus 2 haus 2 2 kossätenweg wohnen wohnen"
+  },
+  {
+   "id": "b705786121",
+   "name": "BaseCamp Haus 3",
+   "short": "BaseCamp Haus 3",
+   "kind": "wohnen",
+   "house": "3",
+   "alias": "",
+   "c": [
+    52.41045,
+    12.96707
+   ],
+   "node": 66,
+   "building": 705786121,
+   "street": "Kossätenweg",
+   "area": 614,
+   "search": "basecamp haus 3 basecamp haus 3 haus 3 3 kossätenweg wohnen wohnen"
+  },
+  {
+   "id": "b705786130",
+   "name": "BaseCamp Haus 4",
+   "short": "BaseCamp Haus 4",
+   "kind": "wohnen",
+   "house": "4",
+   "alias": "",
+   "c": [
+    52.4104,
+    12.96742
+   ],
+   "node": 66,
+   "building": 705786130,
+   "street": "Kossätenweg",
+   "area": 646,
+   "search": "basecamp haus 4 basecamp haus 4 haus 4 4 kossätenweg wohnen wohnen"
+  },
+  {
+   "id": "b705786127",
+   "name": "BaseCamp Haus 5",
+   "short": "BaseCamp Haus 5",
+   "kind": "wohnen",
+   "house": "5",
+   "alias": "",
+   "c": [
+    52.41037,
+    12.9678
+   ],
+   "node": 67,
+   "building": 705786127,
+   "street": "Kossätenweg",
+   "area": 645,
+   "search": "basecamp haus 5 basecamp haus 5 haus 5 5 kossätenweg wohnen wohnen"
+  },
+  {
+   "id": "b705786124",
+   "name": "BaseCamp Haus 6",
+   "short": "BaseCamp Haus 6",
+   "kind": "wohnen",
+   "house": "6",
+   "alias": "",
+   "c": [
+    52.41033,
+    12.96819
+   ],
+   "node": 1165,
+   "building": 705786124,
+   "street": "Kossätenweg",
+   "area": 645,
+   "search": "basecamp haus 6 basecamp haus 6 haus 6 6 kossätenweg wohnen wohnen"
+  },
+  {
+   "id": "b1069857521",
+   "name": "Biocyc",
+   "short": "Biocyc",
+   "kind": "forschen",
+   "house": "4",
+   "alias": "",
+   "c": [
+    52.41279,
+    12.97171
+   ],
+   "node": 1120,
+   "building": 1069857521,
+   "street": "Am Mühlenberg",
+   "area": 382,
+   "search": "biocyc biocyc haus 4 4 am mühlenberg forschung forschung"
+  },
+  {
+   "id": "p798759773",
+   "name": "Cafeteria im IKMZ",
+   "short": "Cafeteria im IKMZ",
+   "kind": "essen",
+   "house": "",
+   "alias": "",
+   "c": [
+    52.40865,
+    12.97365
+   ],
+   "node": 1332,
+   "building": 0,
+   "street": "",
+   "hours": "Mo–Fr ganztägig",
+   "area": 0,
+   "search": "cafeteria im ikmz cafeteria im ikmz essen & trinken essen & trinken"
+  },
+  {
+   "id": "b715563136",
+   "name": "Fraunhofer Anwendungszentrum für Polymer-Nanotechnologien",
+   "short": "Fraunhofer AZ",
+   "kind": "forschen",
+   "house": "",
+   "alias": "",
+   "c": [
+    52.41352,
+    12.96687
+   ],
+   "node": 2607,
+   "building": 715563136,
+   "street": "",
+   "area": 1553,
+   "search": "fraunhofer anwendungszentrum für polymer-nanotechnologien fraunhofer az forschung forschung"
+  },
+  {
+   "id": "b711698642",
+   "name": "Fraunhofer-Campus Kantine",
+   "short": "Fraunhofer-Campus Kantine",
+   "kind": "essen",
+   "house": "",
+   "alias": "",
+   "c": [
+    52.41214,
+    12.96837
+   ],
+   "node": 2601,
+   "building": 711698642,
+   "street": "",
+   "area": 295,
+   "search": "fraunhofer-campus kantine fraunhofer-campus kantine essen & trinken essen & trinken"
+  },
+  {
+   "id": "b25717692",
+   "name": "Fraunhofer-Institut für Angewandte Polymerforschung",
+   "short": "Fraunhofer IAP",
+   "kind": "forschen",
+   "house": "69",
+   "alias": "",
+   "c": [
+    52.41323,
+    12.96812
+   ],
+   "node": 2692,
+   "building": 25717692,
+   "street": "Geiselbergstraße",
+   "area": 3061,
+   "search": "fraunhofer-institut für angewandte polymerforschung fraunhofer iap haus 69 69 geiselbergstraße forschung forschung"
+  },
+  {
+   "id": "b977594349",
+   "name": "Fraunhofer-Konferenzzentrum Potsdam-Golm",
+   "short": "Fraunhofer Konferenzzentrum",
+   "kind": "forschen",
+   "house": "12",
+   "alias": "",
+   "c": [
+    52.41284,
+    12.9689
+   ],
+   "node": 3013,
+   "building": 977594349,
+   "street": "Am Mühlenberg",
+   "area": 780,
+   "search": "fraunhofer-konferenzzentrum potsdam-golm fraunhofer konferenzzentrum haus 12 12 am mühlenberg forschung forschung"
+  },
+  {
+   "id": "b1079848502",
+   "name": "GO:IN 2",
+   "short": "GO:IN 2",
+   "kind": "forschen",
+   "house": "10",
+   "alias": "",
+   "c": [
+    52.41269,
+    12.97088
+   ],
+   "node": 1055,
+   "building": 1079848502,
+   "street": "Am Mühlenberg",
+   "area": 1442,
+   "search": "go:in 2 go:in 2 haus 10 10 am mühlenberg forschung forschung"
+  },
+  {
+   "id": "b711721170",
+   "name": "GO:IN Golm Innovationszentrum",
+   "short": "GO:IN",
+   "kind": "forschen",
+   "house": "11",
+   "alias": "",
+   "c": [
+    52.41294,
+    12.97003
+   ],
+   "node": 2932,
+   "building": 711721170,
+   "street": "Am Mühlenberg",
+   "area": 1519,
+   "search": "go:in golm innovationszentrum go:in haus 11 11 am mühlenberg forschung forschung"
+  },
+  {
+   "id": "p425327806",
+   "name": "goFIT studentischer Fitnessclub",
+   "short": "goFIT",
+   "kind": "sport",
+   "house": "",
+   "alias": "",
+   "c": [
+    52.40762,
+    12.97616
+   ],
+   "node": 1239,
+   "building": 0,
+   "street": "",
+   "hours": "Mo–Fr 08:00–23:00",
+   "area": 0,
+   "search": "gofit studentischer fitnessclub gofit sport sport"
+  },
+  {
+   "id": "p9822658122",
+   "name": "Golm Dönerhaus",
+   "short": "Golm Dönerhaus",
+   "kind": "essen",
+   "house": "",
+   "alias": "",
+   "c": [
+    52.40997,
+    12.97313
+   ],
+   "node": 999,
+   "building": 0,
+   "street": "",
+   "hours": "Mo–So 10:00–21:30",
+   "area": 0,
+   "search": "golm dönerhaus golm dönerhaus essen & trinken essen & trinken"
+  },
+  {
+   "id": "b721213092",
+   "name": "H-Lab",
+   "short": "H-Lab",
+   "kind": "uni",
+   "house": "9",
+   "alias": "",
+   "c": [
+    52.41199,
+    12.9706
+   ],
+   "node": 1729,
+   "building": 721213092,
+   "street": "Am Mühlenberg",
+   "area": 1350,
+   "search": "h-lab h-lab haus 9 9 am mühlenberg universität universität"
+  },
+  {
+   "id": "b172760467",
+   "name": "Haus 1",
+   "short": "Haus 1",
+   "kind": "uni",
+   "house": "1",
+   "alias": "Haus 1",
+   "c": [
+    52.40753,
+    12.97779
+   ],
+   "node": 2104,
+   "building": 172760467,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 1173,
+   "search": "haus 1 haus 1 haus 1 haus 1 1 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b25717939",
+   "name": "Haus 2",
+   "short": "Haus 2",
+   "kind": "uni",
+   "house": "2",
+   "alias": "Haus 2",
+   "c": [
+    52.40806,
+    12.97775
+   ],
+   "node": 2293,
+   "building": 25717939,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 276,
+   "search": "haus 2 haus 2 haus 2 haus 2 2 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b172760468",
+   "name": "Haus 4",
+   "short": "Haus 4",
+   "kind": "uni",
+   "house": "4",
+   "alias": "Haus 4",
+   "c": [
+    52.40794,
+    12.97876
+   ],
+   "node": 2127,
+   "building": 172760468,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 1191,
+   "search": "haus 4 haus 4 haus 4 haus 4 4 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b181020282",
+   "name": "Haus 5",
+   "short": "Haus 5",
+   "kind": "uni",
+   "house": "5",
+   "alias": "Haus 5",
+   "c": [
+    52.40866,
+    12.97898
+   ],
+   "node": 2113,
+   "building": 181020282,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 1879,
+   "search": "haus 5 haus 5 haus 5 haus 5 5 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b158012200",
+   "name": "Haus 6",
+   "short": "Haus 6",
+   "kind": "uni",
+   "house": "6",
+   "alias": "Haus 6",
+   "c": [
+    52.40913,
+    12.97836
+   ],
+   "node": 1883,
+   "building": 158012200,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 667,
+   "search": "haus 6 haus 6 haus 6 haus 6 6 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b172762501",
+   "name": "Haus 7",
+   "short": "Haus 7",
+   "kind": "uni",
+   "house": "7",
+   "alias": "Haus 7",
+   "c": [
+    52.40862,
+    12.97806
+   ],
+   "node": 2053,
+   "building": 172762501,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 1242,
+   "search": "haus 7 haus 7 haus 7 haus 7 7 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b25717139",
+   "name": "Haus 8",
+   "short": "Haus 8",
+   "kind": "uni",
+   "house": "8",
+   "alias": "Haus 8",
+   "c": [
+    52.40898,
+    12.97678
+   ],
+   "node": 722,
+   "building": 25717139,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 1647,
+   "search": "haus 8 haus 8 haus 8 haus 8 8 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b27743815",
+   "name": "Haus 9",
+   "short": "Haus 9",
+   "kind": "uni",
+   "house": "9",
+   "alias": "Haus 9",
+   "c": [
+    52.40837,
+    12.97719
+   ],
+   "node": 2154,
+   "building": 27743815,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 762,
+   "search": "haus 9 haus 9 haus 9 haus 9 9 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b25717040",
+   "name": "Haus 10",
+   "short": "Haus 10",
+   "kind": "uni",
+   "house": "10",
+   "alias": "Haus 10",
+   "c": [
+    52.40794,
+    12.97653
+   ],
+   "node": 1732,
+   "building": 25717040,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 2223,
+   "search": "haus 10 haus 10 haus 10 haus 10 10 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b25717592",
+   "name": "Haus 11",
+   "short": "Haus 11",
+   "kind": "uni",
+   "house": "11",
+   "alias": "Haus 11",
+   "c": [
+    52.40729,
+    12.97646
+   ],
+   "node": 1247,
+   "building": 25717592,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 2227,
+   "search": "haus 11 haus 11 haus 11 haus 11 11 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b25717266",
+   "name": "Haus 12",
+   "short": "Haus 12",
+   "kind": "uni",
+   "house": "12",
+   "alias": "Haus 12",
+   "c": [
+    52.4089,
+    12.9797
+   ],
+   "node": 2359,
+   "building": 25717266,
+   "street": "",
+   "area": 698,
+   "search": "haus 12 haus 12 haus 12 haus 12 12 universität universität"
+  },
+  {
+   "id": "b25891535",
+   "name": "Haus 14",
+   "short": "Haus 14",
+   "kind": "uni",
+   "house": "14",
+   "alias": "Haus 14",
+   "c": [
+    52.40764,
+    12.97406
+   ],
+   "node": 421,
+   "building": 25891535,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 1163,
+   "search": "haus 14 haus 14 haus 14 haus 14 14 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b48854563",
+   "name": "Haus 14a",
+   "short": "Haus 14a",
+   "kind": "uni",
+   "house": "14a",
+   "alias": "Haus 14a",
+   "c": [
+    52.40776,
+    12.97441
+   ],
+   "node": 421,
+   "building": 48854563,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 759,
+   "search": "haus 14a haus 14a haus 14a haus 14a 14a karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b1074582269",
+   "name": "Haus 16",
+   "short": "Haus 16",
+   "kind": "uni",
+   "house": "16",
+   "alias": "Haus 16",
+   "c": [
+    52.40697,
+    12.97324
+   ],
+   "node": 577,
+   "building": 1074582269,
+   "street": "",
+   "area": 422,
+   "search": "haus 16 haus 16 haus 16 haus 16 16 universität universität"
+  },
+  {
+   "id": "b763347996",
+   "name": "Haus 17 A",
+   "short": "Haus 17 A",
+   "kind": "uni",
+   "house": "17",
+   "alias": "Haus 17",
+   "c": [
+    52.40741,
+    12.97347
+   ],
+   "node": 1596,
+   "building": 763347996,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 1200,
+   "search": "haus 17 a haus 17 a haus 17 haus 17 17 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b763347997",
+   "name": "Haus 17 B",
+   "short": "Haus 17 B",
+   "kind": "uni",
+   "house": "17",
+   "alias": "Haus 17",
+   "c": [
+    52.40778,
+    12.97362
+   ],
+   "node": 1595,
+   "building": 763347997,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 1186,
+   "search": "haus 17 b haus 17 b haus 17 haus 17 17 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b90582817",
+   "name": "Haus 19",
+   "short": "Haus 19",
+   "kind": "uni",
+   "house": "19",
+   "alias": "Haus 19",
+   "c": [
+    52.40625,
+    12.97538
+   ],
+   "node": 715,
+   "building": 90582817,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 2296,
+   "search": "haus 19 haus 19 haus 19 haus 19 19 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b172760466",
+   "name": "Haus 20",
+   "short": "Haus 20",
+   "kind": "uni",
+   "house": "20",
+   "alias": "Haus 20",
+   "c": [
+    52.40622,
+    12.97672
+   ],
+   "node": 1233,
+   "building": 172760466,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 926,
+   "search": "haus 20 haus 20 haus 20 haus 20 20 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b172760464",
+   "name": "Haus 24",
+   "short": "Haus 24",
+   "kind": "uni",
+   "house": "24",
+   "alias": "Haus 24",
+   "c": [
+    52.40683,
+    12.97636
+   ],
+   "node": 1025,
+   "building": 172760464,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 1517,
+   "search": "haus 24 haus 24 haus 24 haus 24 24 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b25717140",
+   "name": "Haus 27",
+   "short": "Haus 27",
+   "kind": "uni",
+   "house": "27",
+   "alias": "Haus 27",
+   "c": [
+    52.40949,
+    12.97524
+   ],
+   "node": 1491,
+   "building": 25717140,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 3286,
+   "search": "haus 27 haus 27 haus 27 haus 27 27 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b194947404",
+   "name": "Haus 29",
+   "short": "Haus 29",
+   "kind": "uni",
+   "house": "29",
+   "alias": "Haus 29",
+   "c": [
+    52.40912,
+    12.97529
+   ],
+   "node": 424,
+   "building": 194947404,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 3094,
+   "search": "haus 29 haus 29 haus 29 haus 29 29 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b25717589",
+   "name": "Haus 30",
+   "short": "Haus 30",
+   "kind": "forschen",
+   "house": "30",
+   "alias": "Haus 30",
+   "c": [
+    52.40766,
+    12.97512
+   ],
+   "node": 1505,
+   "building": 25717589,
+   "street": "",
+   "area": 1066,
+   "search": "haus 30 haus 30 haus 30 haus 30 30 forschung forschung"
+  },
+  {
+   "id": "b343509313",
+   "name": "Haus 31",
+   "short": "Haus 31",
+   "kind": "uni",
+   "house": "31",
+   "alias": "Haus 31",
+   "c": [
+    52.40733,
+    12.97537
+   ],
+   "node": 1314,
+   "building": 343509313,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 768,
+   "search": "haus 31 haus 31 haus 31 haus 31 31 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b90582821",
+   "name": "Haus 35",
+   "short": "Haus 35",
+   "kind": "uni",
+   "house": "35",
+   "alias": "Haus 35",
+   "c": [
+    52.40638,
+    12.97609
+   ],
+   "node": 968,
+   "building": 90582821,
+   "street": "Karl-Liebknecht-Straße",
+   "area": 252,
+   "search": "haus 35 haus 35 haus 35 haus 35 35 karl-liebknecht-straße universität universität"
+  },
+  {
+   "id": "b722427544",
+   "name": "Haus 70",
+   "short": "Haus 70",
+   "kind": "uni",
+   "house": "70",
+   "alias": "Haus 70",
+   "c": [
+    52.41324,
+    12.97441
+   ],
+   "node": 3001,
+   "building": 722427544,
+   "street": "An der Bahn",
+   "area": 1572,
+   "search": "haus 70 haus 70 haus 70 haus 70 70 an der bahn universität universität"
+  },
+  {
+   "id": "p7707309581",
+   "name": "innoFSPEC Potsdam-Golm",
+   "short": "innoFSPEC Potsdam-Golm",
+   "kind": "forschen",
+   "house": "",
+   "alias": "",
+   "c": [
+    52.41372,
+    12.97125
+   ],
+   "node": 2912,
+   "building": 0,
+   "street": "",
+   "area": 0,
+   "search": "innofspec potsdam-golm innofspec potsdam-golm forschung forschung"
+  },
+  {
+   "id": "b1221719588",
+   "name": "KiTa",
+   "short": "KiTa In der Feldmark",
+   "kind": "service",
+   "house": "14",
+   "alias": "",
+   "c": [
+    52.41244,
+    12.97858
+   ],
+   "node": 3081,
+   "building": 1221719588,
+   "street": "In der Feldmark",
+   "area": 941,
+   "search": "kita kita in der feldmark haus 14 14 in der feldmark service service"
+  },
+  {
+   "id": "p1921575460",
+   "name": "Lesecafé",
+   "short": "Lesecafé",
+   "kind": "lernen",
+   "house": "",
+   "alias": "",
+   "c": [
+    52.4118,
+    12.9663
+   ],
+   "node": 945,
+   "building": 0,
+   "street": "",
+   "hours": "24/7 offen",
+   "area": 0,
+   "search": "lesecafé lesecafé lernen & bibliothek lernen & bibliothek"
+  },
+  {
+   "id": "b25717647",
+   "name": "Max-Planck-Campus Gästehaus",
+   "short": "MPI Gästehaus",
+   "kind": "forschen",
+   "house": "2",
+   "alias": "",
+   "c": [
+    52.41406,
+    12.96964
+   ],
+   "node": 2890,
+   "building": 25717647,
+   "street": "Am Mühlenberg",
+   "area": 705,
+   "search": "max-planck-campus gästehaus mpi gästehaus haus 2 2 am mühlenberg forschung forschung"
+  },
+  {
+   "id": "b25717643",
+   "name": "Max-Planck-Institut für Gravitationsphysik",
+   "short": "MPI Gravitationsphysik",
+   "kind": "forschen",
+   "house": "1",
+   "alias": "",
+   "c": [
+    52.41635,
+    12.97008
+   ],
+   "node": 2807,
+   "building": 25717643,
+   "street": "Am Mühlenberg",
+   "area": 1851,
+   "search": "max-planck-institut für gravitationsphysik mpi gravitationsphysik haus 1 1 am mühlenberg forschung forschung"
+  },
+  {
+   "id": "p716898328",
+   "name": "Mensa Golm",
+   "short": "Mensa Golm",
+   "kind": "essen",
+   "house": "",
+   "alias": "",
+   "c": [
+    52.40804,
+    12.97888
+   ],
+   "node": 2111,
+   "building": 0,
+   "street": "",
+   "hours": "Mo–Fr 09:00–15:00",
+   "area": 0,
+   "search": "mensa golm mensa golm essen & trinken essen & trinken"
+  },
+  {
+   "id": "b90586114",
+   "name": "Stellwerk",
+   "short": "Stellwerk",
+   "kind": "essen",
+   "house": "28",
+   "alias": "",
+   "c": [
+    52.40905,
+    12.97206
+   ],
+   "node": 1217,
+   "building": 90586114,
+   "street": "Karl-Liebknecht-Straße",
+   "hours": "Gastronomie · Theater im Bahnhof",
+   "area": 234,
+   "search": "stellwerk stellwerk haus 28 28 karl-liebknecht-straße essen & trinken essen & trinken"
+  },
+  {
+   "id": "b966121543",
+   "name": "ZeLB I",
+   "short": "ZeLB I (im Bau)",
+   "kind": "lernen",
+   "house": "",
+   "alias": "",
+   "c": [
+    52.40726,
+    12.9747
+   ],
+   "node": 1241,
+   "building": 966121543,
+   "street": "",
+   "area": 1176,
+   "note": "Bauarbeiten",
+   "search": "zelb i zelb i (im bau) lernen & bibliothek lernen & bibliothek"
+  }
+ ]
+}
