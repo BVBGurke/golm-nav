@@ -6,6 +6,10 @@ inklusive Blickrichtung, automatischer Neuberechnung und Schritt-für-Schritt-Hi
 
 **React + Vite + TypeScript + Tailwind, Karte mit MapLibre GL, Routing vollständig im Browser.**
 
+| Start | Zielliste mit Suche | Route | Live-Navigation |
+| --- | --- | --- | --- |
+| ![Start](docs/screens/01-start.png) | ![Suche](docs/screens/02-suche.png) | ![Route](docs/screens/03-route.png) | ![Navigation](docs/screens/04-navigation.png) |
+
 ## Was es macht
 
 - **Karte mit allen Häusern.** 51 ausgewählte Ziele (Haus 1–70, BaseCamp 1–6, H-Labor,
@@ -24,13 +28,26 @@ inklusive Blickrichtung, automatischer Neuberechnung und Schritt-für-Schritt-Hi
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
+npm run dev      # Entwicklung: http://localhost:5173
 npm run build    # Produktionsbuild in dist/
-npm run preview  # gebauten Stand lokal ausliefern
+npm run serve    # gebauten Stand ausliefern (Port 4180)
 ```
 
-Für den Handy-Test im gleichen WLAN läuft `npm run dev` bereits auf allen Interfaces
-(`--host`), die Adresse steht beim Start in der Konsole.
+### Auf dem Handy testen
+
+Der Browser gibt den Standort nur in einem sicheren Kontext frei – `http://<IP>:4180`
+reicht **nicht**, auch nicht über Tailscale. Deshalb geht der Weg über HTTPS:
+
+```bash
+npm run build
+npm run serve                                          # lauscht auf 127.0.0.1:4180
+tailscale serve --bg --https=8443 http://127.0.0.1:4180
+# -> https://<host>.<tailnet>.ts.net:8443
+```
+
+Denselben Zweck erfüllt ein Tunnel (zum Beispiel `ngrok http 4180`), der eine
+`https://`-Adresse liefert. Port 4180 statt 5173, damit nichts mit anderen Projekten
+kollidiert.
 
 ## Woher die Daten kommen
 

@@ -11,7 +11,8 @@
     "data:fetch": "node scripts/fetch_osm.mjs",
     "data:build": "node scripts/build_campus.mjs && node scripts/dump_places.mjs && node scripts/build_pois.mjs src",
     "data:bits": "node scripts/extract_bits.mjs src",
-    "data": "npm run data:build"
+    "data": "npm run data:build",
+    "serve": "node scripts/serve.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

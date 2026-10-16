@@ -418,16 +418,18 @@ export function NavPanel({ route, travelled, offRoute, heading, onStop, onRecent
       </div>
 
       {stepsLeft.length > 0 && (
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-3">
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-28 sm:pb-24">
           <div className="mb-2 text-[10px] tracking-wider text-slate-500 uppercase">Nächste Schritte</div>
           <ol className="space-y-1">
-            {stepsLeft.slice(0, 6).map((s, i) => (
+            {stepsLeft.slice(0, 8).map((s, i) => (
               <li key={`${s.index}-${i}`} className="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-white/5">
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-up-400/25 text-up-300">
                   <TurnGlyph turn={s.turn} size={16} />
                 </span>
                 <span className="min-w-0 flex-1 truncate text-xs text-slate-300">{s.text}</span>
-                <span className="shrink-0 font-mono text-[11px] text-slate-500">{formatDistance(s.distance)}</span>
+                <span className="shrink-0 font-mono text-[11px] text-slate-500">
+                  {s.turn === 'arrive' ? formatDistance(Math.max(0, route.distance - travelled)) : formatDistance(Math.max(0, s.atDistance - travelled))}
+                </span>
               </li>
             ))}
           </ol>
