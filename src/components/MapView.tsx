@@ -6,9 +6,9 @@ import { BASEMAP_STYLE, LAYER, SOURCE } from '@/lib/mapStyle'
 import { circleToFeature, emptyCollection, pointToFeature, polylineToFeature, type FeatureCollection } from '@/lib/geojson'
 import { addCampusLayers } from '@/lib/mapLayers'
 
-/* Vite pre-bundles MapLibre, which hides its worker from the library's own
- * URL resolution. The plugin in vite.config.ts publishes the worker and leaves
- * its URL on window; fall back to the default resolution when it is absent. */
+/* Vite bündelt MapLibre vor und versteckt damit die Worker-URL vor der
+ * Auflösung der Bibliothek. Das Plugin in vite.config.ts legt den Worker ab
+ * und hinterlässt seine Adresse auf window; fehlt sie, greift der Standard. */
 const workerUrl = (window as Window & { __MAPLIBRE_WORKER_URL__?: string }).__MAPLIBRE_WORKER_URL__
 if (workerUrl) setWorkerUrl(workerUrl)
 
@@ -30,8 +30,8 @@ interface MapViewProps {
 }
 
 /**
- * MapLibre wrapper: basemap, campus building footprints, live route line, the
- * user pin and the camera behaviour (follow mode vs. route overview).
+ * Karte: Grundkarte, Gebäudeumrisse, Route, Standortpunkt und das Verhalten
+ * der Kamera — der Position folgen oder die Route als Ganzes zeigen.
  */
 export default function MapView({
   data,
@@ -113,7 +113,7 @@ export default function MapView({
       map.current = null
       setReady(false)
     }
-    // the map instance is created exactly once
+    // Die Karte wird genau einmal aufgebaut.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -124,13 +124,13 @@ export default function MapView({
     source(instance, id).setData(collection)
   }
 
-  /* route line */
+  /* Route */
   useEffect(() => {
     setData(SOURCE.route, route ? { type: 'FeatureCollection', features: [polylineToFeature(route.coords)] } : emptyCollection())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route, ready])
 
-  /* progress already covered */
+  /* Der schon gelaufene Teil */
   useEffect(() => {
     if (!route) {
       setData(SOURCE.walked, emptyCollection())
@@ -151,7 +151,7 @@ export default function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route, travelled, ready])
 
-  /* own position, with the GPS uncertainty drawn to scale */
+  /* Eigene Position; die GPS-Streuung wird maßstäblich gezeichnet */
   useEffect(() => {
     setData(
       SOURCE.user,
@@ -166,7 +166,7 @@ export default function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userPosition, accuracy, ready])
 
-  /* the scale is set outside the map, so the camera follows that value */
+  /* Der Maßstab wird außerhalb der Karte gesetzt, die Kamera folgt ihm */
   useEffect(() => {
     const instance = map.current
     if (!instance || !ready) return
@@ -175,7 +175,7 @@ export default function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoom, ready])
 
-  /* outlines of the selected and hovered destination */
+  /* Umrisse von gewähltem und überfahrenem Ziel */
   useEffect(() => {
     const features = []
     const ringOf = (id: number) => {
@@ -197,7 +197,7 @@ export default function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, hovered, buildingOf, ready])
 
-  /* camera: follow the walker, otherwise frame the route or the selection */
+  /* Kamera: der Position folgen, sonst Route oder Auswahl rahmen */
   useEffect(() => {
     const instance = map.current
     if (!instance || !ready) return

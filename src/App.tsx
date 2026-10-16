@@ -36,8 +36,6 @@ export default function App() {
   const [campus] = useState<Campus>(() => createCampus(data.walk.coords, data.walk.edges, data.walk.roads))
   const [intro, setIntro] = useState(true)
   const [mode, setMode] = useState<Mode>('explore')
-  /* Filter und Suchtext gehören dem Rumpf, nicht dem Einstieg: der
-     Einstiegsknopf setzt sie, das Panel liest sie. */
   const [query, setQuery] = useState('')
   const [kinds, setKinds] = useState<Set<PoiKind>>(new Set())
   const [sort, setSort] = useState<'name' | 'near'>('name')
@@ -62,8 +60,8 @@ export default function App() {
   const liveState: LocationState = live
   const hasFix = liveState.status === 'live' && liveState.position !== null
 
-  /* Der Standort ist einmal vorliegen — dann erklärt die App einmal, was mit
-     ihm passiert, und danach nie wieder. */
+  /* Einmal pro Sitzung: sobald der erste Fix da ist, erklärt die App, was mit
+     dem Standort passiert. Danach nicht wieder. */
   useEffect(() => {
     if (!hasFix || sessionStorage.getItem('golmnav.location-notice')) return
     sessionStorage.setItem('golmnav.location-notice', '1')
@@ -202,8 +200,8 @@ export default function App() {
   const progress = route && route.distance > 0 ? Math.min(1, travelled / route.distance) : 0
   const navigating = mode === 'navigate' && route !== null
 
-  /* Der Einstieg endet auf zwei Wegen: Standort freigeben oder eine Kategorie
-     wählen. Beide landen im Zielfilter, der Einstieg selbst verschwindet. */
+  /* Der Einstieg endet entweder auf „Standort freigeben“ oder auf einer
+     Kategorie; beide landen im Zielfilter. */
   const startWith = (kind: PoiKind | null) => {
     if (kind) {
       setPanel('ziele')
