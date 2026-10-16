@@ -12,7 +12,9 @@
     "data:build": "node scripts/build_campus.mjs && node scripts/dump_places.mjs && node scripts/build_pois.mjs src",
     "data:bits": "node scripts/extract_bits.mjs src",
     "data": "npm run data:build",
-    "serve": "node scripts/serve.mjs"
+    "serve": "node scripts/serve.mjs",
+    "shots": "node docs/capture.mjs",
+    "check:routes": "node docs/check-routes.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -31,6 +33,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
+    "playwright-core": "^1.64.1",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"

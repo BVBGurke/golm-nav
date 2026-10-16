@@ -93,17 +93,19 @@ export class WalkGraph {
     prev.fill(-1)
     closed.fill(0)
 
+    /* Straight-line metres to the goal. The graph weights are already metres, so
+       the heuristic must be too — scaling here by anything else makes A* expand
+       the wrong nodes and return a detour instead of the shortest path. */
     const goalCoord = this.coords[goal]
-    const scaleLat = 1 / M_PER_DEG_LAT
-    const scaleLon = 1 / (M_PER_DEG_LAT * Math.cos((goalCoord[0] * Math.PI) / 180))
+    const scaleLon = Math.cos((goalCoord[0] * Math.PI) / 180)
     const heuristic = (i: number) => {
       const c = this.coords[i]
-      const dy = (c[0] - goalCoord[0]) * scaleLat
-      const dx = (c[1] - goalCoord[1]) * scaleLon
-      return Math.hypot(dx, dy) * M_PER_DEG_LAT * 1.42 * 0.98
+      const dy = (c[0] - goalCoord[0]) * M_PER_DEG_LAT
+      const dx = (c[1] - goalCoord[1]) * M_PER_DEG_LAT * scaleLon
+      return Math.hypot(dx, dy)
     }
 
-    const heap = new MinHeap(1024)
+    const heap = new MinHeap()
     g[start] = 0
     heap.push(heuristic(start), start)
 
@@ -150,11 +152,6 @@ export class WalkGraph {
 class MinHeap {
   private items: number[] = []
   private priorities: number[] = []
-
-  constructor(capacity: number) {
-    this.items = new Array(capacity)
-    this.priorities = new Array(capacity)
-  }
 
   get size(): number {
     return this.items.length

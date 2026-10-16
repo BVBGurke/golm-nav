@@ -25,3 +25,6 @@ dist-ssr
 
 # Pipeline-Zwischenstand (pois_raw.json wird aus scripts/data/ neu erzeugt)
 out/
+
+# Vom Vite-Plugin aus node_modules kopiert
+public/maplibre-gl-worker.mjs

@@ -6,23 +6,62 @@ inklusive Blickrichtung, automatischer Neuberechnung und Schritt-für-Schritt-Hi
 
 **React + Vite + TypeScript + Tailwind, Karte mit MapLibre GL, Routing vollständig im Browser.**
 
-| Start | Zielliste mit Suche | Route | Live-Navigation |
-| --- | --- | --- | --- |
-| ![Start](docs/screens/01-start.png) | ![Suche](docs/screens/02-suche.png) | ![Route](docs/screens/03-route.png) | ![Navigation](docs/screens/04-navigation.png) |
+![Startbildschirm](docs/screens/01-start.png)
 
 ## Was es macht
 
-- **Karte mit allen Häusern.** 51 ausgewählte Ziele (Haus 1–70, BaseCamp 1–6, H-Labor,
-  GO:IN, Mensa, Stellwerk, Fraunhofer, Max-Planck-Campus, Bahnhof Golm) auf 1 233 echten
-  Gebäudeumrissen. Jedes Ziel ist anklickbar und wird mit Namen und Hausnummer beschriftet.
-- **Live-Navigation.** GPS-Position, Kompass-Blickrichtung, Fortschrittsanzeige und
-  automatische Neuberechnung, sobald du mehr als 40 m von der Route abweichst.
+### Alle Ziele auf einer Karte
+
+51 ausgewählte Ziele – Haus 1–70, BaseCamp 1–6, H-Labor, GO:IN, Mensa, Stellwerk,
+Fraunhofer, Max-Planck-Campus, Bahnhof Golm – liegen auf 1 233 echten Gebäudeumrissen aus
+OpenStreetMap. Jedes Ziel ist anklickbar und wird mit Namen und Hausnummer beschriftet.
+
+![Karte mit allen Zielen](docs/screens/02-karte.png)
+
+### Ziel finden und Route bekommen
+
+Die Volltextsuche greift über Name, Hausnummer, Straße und Kategorie. Darunter filtern
+Schaltflächen nach Universität, Forschung, Essen, Lernen, Wohnen, Sport, Service und Verkehr,
+und die Trefferliste lässt sich alphabetisch oder nach Entfernung sortieren.
+
+![Suche und Kategoriefilter](docs/screens/03-suche.png)
+
+Nach der Zielwahl steht die Route: Distanz, Gehzeit, Ankunftszeit und die Anzahl der
+Abbiegungen. Der Weg folgt dem echten Fußwegenetz aus OSM, nicht der Luftlinie.
+
+![Route zum Ziel](docs/screens/04-route.png)
+
+### Live-Navigation unterwegs
+
+GPS-Position, Kompass-Blickrichtung, Fortschrittsbalken und Schritt-für-Schritt-Hinweise.
+Der Standort kommt vom Gerät, verlässt es nicht.
+
+![Live-Navigation](docs/screens/05-navigation.png)
+
+Weichst du mehr als 40 m von der Route ab, rechnet die App im Hintergrund neu – ohne dass
+du die Navigation anhalten musst.
+
+![Automatische Neuberechnung](docs/screens/06-abweichung.png)
+
+### Auf dem Handy
+
+Dieselbe App, dieselbe Zielliste, für 390 px Breite.
+
+<img src="docs/screens/07-mobil.png" alt="Zielliste auf dem Handy" width="320">
+
+## Was drinsteckt
+
 - **Eigenes Routing.** Ein Fußweg-Graph aus OpenStreetMap (3 404 Knoten, 3 832 Kanten) wird
   mit A\* und einer Luftlinien-Heuristik im Browser durchgerechnet. Keine Anfragen an einen
   Routing-Dienst, kein API-Key, funktioniert offline, Antwortzeit unter einer Millisekunde.
-- **Suche und Filter.** Volltextsuche über Name, Hausnummer, Straße und Kategorie, dazu
-  Filter nach Universität, Forschung, Essen, Lernen, Wohnen, Sport, Service und Verkehr.
-- **Startpunkt per Klick.** Ohne Standortfreigabe tippst du einfach auf die Karte.
+  Alle 51 Ziele liefern dieselbe Distanz wie eine Dijkstra-Referenzimplementierung.
+- **Startpunkt per Klick.** Ohne Standortfreigabe tippst du einfach auf die Karte – die
+  Route wird trotzdem berechnet.
+- **Karte ohne Schlüssel.** MapLibre GL mit CARTO-Kacheln, dazu ein eigener Style-Layer für
+  Gebäude nach Kategorie, Route, Fortschritt und Marker.
+- **12 Komponenten von [React Bits](https://reactbits.dev).** Silk, SplitText, ShinyText,
+  CountUp, SpotlightCard, GlareHover, Magnet, AnimatedList, LatticeLoader, GlassSurface,
+  PillNav, ScrollReveal – unverändert übernommen und in die Oberfläche eingebettet.
 
 ## Starten
 
@@ -91,8 +130,10 @@ src/
 ```
 
 Die Komponenten in `src/bits/` sind 1:1 aus der [React Bits](https://reactbits.dev)-Registry
-(TS+Tailwind-Variante) übernommen: Silk, SplitText, ShinyText, CountUp, SpotlightCard,
-GlareHover, Magnet, AnimatedList, LatticeLoader, GlassSurface, PillNav, ScrollReveal.
+(TS+Tailwind-Variante) übernommen und werden über `npm run data:bits` neu eingelesen.
+
+Die Screenshots im README entstehen mit `node docs/capture.mjs`; Details stehen in
+`docs/screens/README.md`.
 
 ## Bedienung
 
