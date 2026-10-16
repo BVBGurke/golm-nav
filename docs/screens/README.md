@@ -7,7 +7,8 @@ npm run serve            # in einem zweiten Terminal
 npm run shots            # schreibt nach docs/screens/
 ```
 
-Aufgenommen wird mit Chromium in doppelter Pixeldichte (1600 × 1000 bzw. 390 × 844 mobil).
+Aufgenommen wird mit Chromium in doppelter Pixeldichte (1600 × 1000 Desktop, 390 × 844 mobil in
+Dreifacher, beides danach halbiert).
 Direkt danach skaliert das Skript über ImageMagick auf das Nennmaß herunter und reduziert die
 Farbtiefe; das hält die Dateien bei rund 160–200 kB und den Text trotzdem scharf. Fehlt
 ImageMagick, bleiben die Bilder in doppelter Auflösung liegen – scharf, aber groß.
@@ -22,7 +23,7 @@ Geolocation-Emulation von Playwright – echte Standortdaten braucht das Skript 
 | --- | --- |
 | `01-start.png` | Einstiegsbildschirm mit Standortfreigabe |
 | `02-karte.png` | Karte mit allen 51 Zielen und Beschriftungen |
-| `03-suche.png` | Volltextsuche mit Kategoriefilter „Wohnen“ |
+| `03-suche.png` | Volltextsuche mit Kategoriefilter „Forschung“ |
 | `04-route.png` | Route von der eigenen Position zum MPI Gravitationsphysik |
 | `05-navigation.png` | Live-Navigation mit Abbiegehinweisen |
 | `06-abweichung.png` | Neuberechnung nach Verlassen der Route |
