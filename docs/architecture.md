@@ -46,7 +46,9 @@ eine Kante schon.
 
 Das Panel ist ein Overlay, kein Flex-Geschwister der Karte. Dadurch bleibt der
 Kartenmittelpunkt beim Öffnen und Schließen an derselben Stelle, und die
-Kamera-Rechnung braucht nur einen einzigen Randversatz.
+Kamera-Rechnung braucht nur einen einzigen Randversatz. Auf dem Handy liegt es
+unten und ist flacher, sobald navigiert wird: dort zählt die Strecke vor
+dem Fahrer mehr als der Rest der Fahrt.
 
 ## Bausteine
 

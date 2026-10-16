@@ -302,7 +302,9 @@ export default function App() {
       {/* Das Panel legt sich über die Karte, statt sie zu verschieben: der
           Kartenmittelpunkt bleibt beim Öffnen und Schließen stehen. */}
       <aside
-        className={`absolute inset-x-0 bottom-0 z-30 max-h-[78vh] sm:inset-y-0 sm:top-[52px] sm:left-0 sm:max-h-none sm:w-[400px] ${
+        className={`absolute inset-x-0 bottom-0 z-30 sm:inset-y-0 sm:top-[52px] sm:left-0 sm:max-h-none sm:w-[400px] ${
+          navigating ? 'max-h-[58vh]' : 'max-h-[78vh]'
+        } ${
           sheetOpen ? '' : 'translate-y-[calc(100%-3.25rem)] sm:-translate-x-full sm:translate-y-0'
         } transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]`}
       >
@@ -488,19 +490,23 @@ export default function App() {
         accuracy={hasFix ? liveState.accuracy : null}
       />
 
-      <SwipeToast
-        open={toastOpen}
-        onClose={() => setToastOpen(false)}
-        title="Standort ist aktiv"
-        description="Die Position bleibt auf diesem Gerät. Es gibt keinen Server, an den sie gesendet wird."
-        background="#0c141f"
-        color="#e9eff6"
-        fuseColor="#f5b301"
-        duration={4500}
-        closeButton
-        width={336}
-        radius={4}
-      />
+      {/* Die feste Hülle des Hinweises liegt über der ganzen Seite; nur die
+          Meldung selbst darf Zeigerereignisse annehmen. */}
+      <div className="pointer-events-none [&_[role=status]]:pointer-events-auto">
+        <SwipeToast
+          open={toastOpen}
+          onClose={() => setToastOpen(false)}
+          title="Standort ist aktiv"
+          description="Die Position bleibt auf diesem Gerät. Es gibt keinen Server, an den sie gesendet wird."
+          background="#0c141f"
+          color="#e9eff6"
+          fuseColor="#f5b301"
+          duration={4500}
+          closeButton
+          width={336}
+          radius={4}
+        />
+      </div>
 
       {intro && <Intro data={data} onDismiss={startWith} />}
     </div>
