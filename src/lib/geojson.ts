@@ -61,6 +61,18 @@ export function poisToFeatureCollection(pois: Poi[]): FeatureCollection {
   }
 }
 
+/** Genauigkeitskreis des GPS-Fixes als Polygon — in Metern, nicht in Bildpunkten. */
+export function circleToFeature(center: LatLng, radiusMetres: number, steps = 48): Feature {
+  const [lat, lon] = center
+  const metresPerDegLon = 111320 * Math.cos((lat * Math.PI) / 180)
+  const ring: number[][] = []
+  for (let i = 0; i <= steps; i++) {
+    const angle = (i / steps) * Math.PI * 2
+    ring.push([lon + (Math.cos(angle) * radiusMetres) / metresPerDegLon, lat + (Math.sin(angle) * radiusMetres) / 111320])
+  }
+  return { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [ring] } }
+}
+
 export function polylineToFeature(coords: LatLng[], properties: Record<string, unknown> = {}): Feature {
   return {
     type: 'Feature',

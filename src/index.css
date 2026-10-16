@@ -1,19 +1,42 @@
+@import '@fontsource/archivo/400.css';
+@import '@fontsource/archivo/500.css';
+@import '@fontsource/archivo/600.css';
+@import '@fontsource/archivo-narrow/500.css';
+@import '@fontsource/archivo-narrow/600.css';
+@import '@fontsource/archivo-narrow/700.css';
 @import 'tailwindcss';
 
+/* Farben, Schrift und Radien sind Eigenschaften dieses Projekts, keine
+   Tailwind-Vorgaben: Blau trägt Handlungen, Signalgold ausschließlich die
+   nächste Abbiegung. Zwei Akzente, mehr nicht. */
 @theme {
-  --color-ink-950: #030814;
-  --color-ink-900: #061127;
-  --color-ink-800: #0a1b3a;
-  --color-ink-700: #123055;
-  --color-up-600: #00386b;
-  --color-up-500: #0a5aa8;
-  --color-up-400: #2b86d9;
-  --color-up-300: #7cc0f2;
-  --color-accent-500: #f2b230;
-  --color-accent-400: #ffc95c;
-  --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
-  --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --color-base-900: #05090f;
+  --color-base-800: #080e17;
+  --color-surface: #0c141f;
+  --color-surface-2: #121c2a;
+  --color-surface-3: #1a2634;
+
+  --color-line: #ffffff14;
+  --color-line-2: #ffffff26;
+  --color-line-3: #ffffff40;
+
+  --color-ink: #e9eff6;
+  --color-ink-2: #a9b7c9;
+  --color-ink-3: #6e7f94;
+
+  --color-action: #0b4ea2;
+  --color-action-2: #1462c4;
+  --color-action-3: #083a7a;
+  --color-signal: #f5b301;
+  --color-signal-2: #ffcb3d;
+  --color-go: #2fbf71;
+  --color-stop: #e05c6e;
+
+  --font-display: 'Archivo Narrow', 'Archivo', system-ui, sans-serif;
+  --font-sans: 'Archivo', system-ui, sans-serif;
+
+  --radius-tight: 2px;
+  --radius-panel: 5px;
 }
 
 @layer base {
@@ -25,80 +48,117 @@
 
   body {
     margin: 0;
-    background: var(--color-ink-950);
-    color: #eaf2ff;
+    background: var(--color-base-900);
+    color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
   }
 
+  /* Namen und Zahlen stehen in der schmalen Breite — deutsche Institutsnamen
+     sind lang, und Zahlen sollen untereinander stehen. */
+  .font-display,
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
   ::selection {
-    background: var(--color-up-400);
-    color: #041020;
+    background: var(--color-action-2);
+    color: #fff;
   }
 
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--color-up-400) 35%, transparent);
-    border-radius: 999px;
-    border: 2px solid transparent;
-    background-clip: content-box;
+    background: #ffffff1f;
+    border-radius: 0;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklab, var(--color-up-400) 60%, transparent);
-    background-clip: content-box;
+    background: #ffffff33;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent-400);
-    outline-offset: 2px;
+    outline: 2px solid var(--color-signal);
+    outline-offset: 1px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-@utility glass-panel {
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--color-ink-800) 78%, transparent),
-    color-mix(in srgb, var(--color-ink-950) 88%, transparent)
-  );
-  backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid color-mix(in srgb, var(--color-up-400) 22%, transparent);
-  box-shadow:
-    0 24px 60px -30px rgba(0, 0, 0, 0.9),
-    inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent);
+/* Flächen --------------------------------------------------------------
+   Zwei Ebenen, beide mit Haarlinie statt Schlagschatten: die Karte bleibt
+   die Bühne, die Bedienoberfläche legt sich als Instrument darüber. */
+@utility surface-panel {
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-line);
 }
 
-@utility text-balance-tight {
-  text-wrap: balance;
+@utility surface-bar {
+  background: color-mix(in srgb, var(--color-base-900) 86%, transparent);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--color-line);
+}
+
+@utility surface-inset {
+  background: var(--color-base-800);
+  border: 1px solid var(--color-line);
+}
+
+/* Überschrift einer Gruppe: klein, gesperrt, aber nicht in Versalien —
+   Versalien für jede Beschriftung ist der schnellste Weg zum Baukasten. */
+@utility label-field {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-3);
+}
+
+@utility rule-h {
+  height: 1px;
+  background: var(--color-line);
 }
 
 /* MapLibre ------------------------------------------------------------- */
 .maplibregl-ctrl-group {
-  background: color-mix(in srgb, var(--color-ink-900) 82%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--color-up-400) 25%, transparent) !important;
-  backdrop-filter: blur(14px);
-  border-radius: 14px !important;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-line-2) !important;
+  border-radius: var(--radius-tight) !important;
   overflow: hidden;
+  box-shadow: none !important;
 }
 
 .maplibregl-ctrl-group button + button {
-  border-top: 1px solid color-mix(in srgb, var(--color-up-400) 20%, transparent) !important;
+  border-top: 1px solid var(--color-line) !important;
 }
 
 .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
-  filter: invert(1) hue-rotate(180deg) brightness(1.4);
+  filter: invert(1) brightness(1.6);
 }
 
 .maplibregl-ctrl-attrib,
 .maplibregl-ctrl-attrib a {
-  background: color-mix(in srgb, var(--color-ink-950) 70%, transparent) !important;
-  color: #9db6d6 !important;
+  background: color-mix(in srgb, var(--color-base-900) 72%, transparent) !important;
+  color: var(--color-ink-3) !important;
   font-size: 10px;
 }
 
@@ -109,20 +169,21 @@
 }
 
 .maplibregl-popup-tip {
-  border-top-color: color-mix(in srgb, var(--color-ink-900) 90%, transparent) !important;
+  border-top-color: var(--color-surface) !important;
 }
 
 .maplibregl-canvas:focus {
   outline: none;
 }
 
+/* Eigene Marker und Linien aus mapLayers.ts ----------------------------- */
 @keyframes golm-pulse {
   0% {
-    transform: scale(0.7);
-    opacity: 0.9;
+    transform: scale(0.6);
+    opacity: 0.95;
   }
   70% {
-    transform: scale(2.6);
+    transform: scale(2.8);
     opacity: 0;
   }
   100% {
@@ -135,16 +196,23 @@
   position: absolute;
   inset: 0;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-accent-400) 70%, transparent);
-  animation: golm-pulse 2.4s ease-out infinite;
+  background: color-mix(in srgb, var(--color-signal) 65%, transparent);
+  animation: golm-pulse 2.6s ease-out infinite;
 }
 
 @keyframes golm-dash {
   to {
-    stroke-dashoffset: -100;
+    stroke-dashoffset: -120;
   }
 }
 
 .golm-route-dash {
-  animation: golm-dash 3.2s linear infinite;
+  animation: golm-dash 3.4s linear infinite;
+}
+
+/* React-Bits-Flächen, die ihre Farbe von uns bekommen. */
+.golm-spectral {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }

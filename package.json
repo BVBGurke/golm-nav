@@ -10,6 +10,7 @@
     "lint": "oxlint",
     "data:fetch": "node scripts/fetch_osm.mjs",
     "data:build": "node scripts/build_campus.mjs && node scripts/dump_places.mjs && node scripts/build_pois.mjs src",
+    "data:bits:fetch": "node scripts/fetch_bits.mjs",
     "data:bits": "node scripts/extract_bits.mjs src",
     "data": "npm run data:build",
     "serve": "node scripts/serve.mjs",
@@ -17,6 +18,8 @@
     "check:routes": "node docs/check-routes.mjs"
   },
   "dependencies": {
+    "@fontsource/archivo": "^5.3.0",
+    "@fontsource/archivo-narrow": "^5.3.0",
     "@gsap/react": "^2.1.2",
     "@hugeicons/core-free-icons": "^4.3.5",
     "@hugeicons/react": "^1.1.10",

@@ -1,10 +1,25 @@
+/* eslint-disable react-refresh/only-export-components -- ZOOM_STEPS teilen sich
+   Panel, Karte und Kopfzeile. */
 import { useEffect, useMemo, useRef } from 'react'
-import LatticeLoader from '@/bits/LatticeLoader'
-import { formatDistance, formatDuration, formatClock } from '@/lib/geo'
+import AnimatedList from '@/bits/AnimatedList'
+import HoldButton from '@/bits/HoldButton'
+import GlideSelect from '@/bits/GlideSelect'
+import RubberSegment from '@/bits/RubberSegment'
+import StatusMark from '@/bits/StatusMark'
+import { formatDistance } from '@/lib/geo'
 import { KINDS, KIND_ORDER } from '@/lib/kinds'
-import { decisionCount, guidance, upcomingSteps, turnShort } from '@/lib/routing'
+import { decisionCount, guidance, upcomingSteps } from '@/lib/routing'
 import type { Poi, PoiKind, Route } from '@/types'
-import { ICONS, Icon, KindChip, KindIcon } from './ui'
+import { ICONS, Icon, KindDot, Notice, ProgressLine, Reading, Row, SectionHead, WALK_SPEED } from './ui'
+
+/** Weitwinkel, Normal, Fern — dieselben Stufen wie die Zoomknöpfe der Karte. */
+export const ZOOM_STEPS = [
+  { id: 'weit', label: 'Campus', zoom: 14.4 },
+  { id: 'normal', label: 'Gebäude', zoom: 15.9 },
+  { id: 'nah', label: 'Eingang', zoom: 17.4 },
+] as const
+
+export type ZoomStep = (typeof ZOOM_STEPS)[number]['id']
 
 interface SearchState {
   query: string
@@ -21,9 +36,20 @@ interface SearchPanelProps {
   onHover: (poi: Poi | null) => void
   selected: Poi | null
   live: boolean
+  onShowAll: () => void
 }
 
-export function SearchPanel({ pois, results, state, onChange, onSelect, onHover, selected, live }: SearchPanelProps) {
+export function SearchPanel({
+  pois,
+  results,
+  state,
+  onChange,
+  onSelect,
+  onHover,
+  selected,
+  live,
+  onShowAll,
+}: SearchPanelProps) {
   const listRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -36,156 +62,191 @@ export function SearchPanel({ pois, results, state, onChange, onSelect, onHover,
     return map
   }, [pois])
 
+  const kindOptions = useMemo(
+    () => [
+      { value: 'alle', label: `Alle ${pois.length}` },
+      ...KIND_ORDER.filter((kind) => (counts.get(kind) ?? 0) > 0).map((kind) => ({
+        value: kind,
+        label: `${KINDS[kind].short} ${counts.get(kind) ?? 0}`,
+      })),
+    ],
+    [counts, pois.length],
+  )
+
+  /* GlideSelect kennt nur einen Wert; die Suche filtert aber über mehrere
+     Kategorien. Deshalb zeigt es die erste gesetzte und setzt beim Wählen neu. */
+  const activeKind = state.kinds.size === 1 ? [...state.kinds][0] : 'alle'
+  const hiddenKinds = state.kinds.size > 1
+
+  const shown = results.slice(0, 60)
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="px-5 pb-3">
-        <label className="group flex items-center gap-2.5 rounded-2xl border border-up-400/25 bg-ink-950/60 px-3.5 py-2.5 transition focus-within:border-accent-400/60 focus-within:bg-ink-950/80">
-          <Icon path={ICONS.search} size={17} className="shrink-0 text-up-300" />
-          <input
-            value={state.query}
-            onChange={(e) => onChange({ query: e.target.value })}
-            placeholder="Haus 27, Mensa, BaseCamp, MPI …"
-            className="w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
-            autoComplete="off"
-            spellCheck={false}
-          />
-          {state.query && (
-            <button
-              type="button"
-              onClick={() => onChange({ query: '' })}
-              className="shrink-0 rounded-full p-1 text-slate-400 transition hover:bg-white/10 hover:text-white"
-              aria-label="Suche leeren"
-            >
-              <Icon path={ICONS.close} size={14} />
-            </button>
-          )}
-        </label>
-
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          <button
-            type="button"
-            onClick={() => onChange({ kinds: new Set() })}
-            className={`rounded-full border px-2.5 py-1 text-[11px] transition ${
-              state.kinds.size === 0
-                ? 'border-accent-400/70 bg-accent-400/15 text-accent-400'
-                : 'border-up-400/25 text-slate-300 hover:border-up-400/60 hover:text-white'
-            }`}
-          >
-            Alle {pois.length}
-          </button>
-          {KIND_ORDER.map((kind) => {
-            const active = state.kinds.has(kind)
-            const meta = KINDS[kind]
-            return (
-              <button
-                key={kind}
-                type="button"
-                onClick={() => {
-                  const next = new Set(state.kinds)
-                  if (active) next.delete(kind)
-                  else next.add(kind)
-                  onChange({ kinds: next })
-                }}
-                className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition"
-                style={
-                  active
-                    ? { borderColor: `${meta.color}aa`, background: `${meta.color}22`, color: meta.color }
-                    : { borderColor: 'rgb(43 134 217 / 0.22)', color: 'rgb(203 213 225 / 0.85)' }
-                }
-              >
-                <KindIcon kind={kind} size={11} />
-                {meta.short}
-                <span className="font-mono opacity-60">{counts.get(kind) ?? 0}</span>
+      <div className="space-y-3 px-4 pt-4 pb-3">
+        {/* Ziele auf der Karte: welche Ziele hervorstechen, in welcher Dichte. */}
+        <div>
+          <SectionHead
+            title="Ziele auf der Karte"
+            aside={
+              <button type="button" onClick={onShowAll} className="text-[12px] text-ink-2 hover:text-ink">
+                Auf der Karte zeigen
               </button>
-            )
-          })}
+            }
+          />
+          <GlideSelect
+            options={kindOptions}
+            value={hiddenKinds ? 'alle' : activeKind}
+            onChange={(value) => onChange({ kinds: value === 'alle' ? new Set() : new Set([value as PoiKind]) })}
+            placeholder="Kategorie"
+            accentColor="#f5b301"
+            surfaceColor="#0c141f"
+            highlightColor="#1a2634"
+            textColor="#e9eff6"
+            size="md"
+            radius={2}
+            menuWidth={240}
+            ariaLabel="Kategorie wählen"
+            className="w-full"
+          />
+          {hiddenKinds && (
+            <p className="pt-2 text-[11px] text-ink-3">
+              {state.kinds.size} Kategorien gefiltert.{' '}
+              <button type="button" className="underline underline-offset-2" onClick={() => onChange({ kinds: new Set() })}>
+                zurücksetzen
+              </button>
+            </p>
+          )}
         </div>
 
-        <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-400">
-          <span>
-            {results.length} von {pois.length} Zielen
-          </span>
-          <div className="flex gap-1">
-            {(['name', 'near'] as const).map((sort) => (
+        <div className="rule-h" />
+
+        {/* Ziele finden: Name, Hausnummer, Straße. */}
+        <div>
+          <SectionHead
+            title="Ziel finden"
+            aside={
+              <span className="text-[11px] text-ink-3">
+                {results.length} von {pois.length}
+              </span>
+            }
+          />
+          <label className="flex items-center gap-2.5 border border-line-2 bg-base-800 px-3 py-2.5 transition-colors focus-within:border-signal">
+            <Icon path={ICONS.search} size={16} className="shrink-0 text-ink-3" />
+            <input
+              value={state.query}
+              onChange={(e) => onChange({ query: e.target.value })}
+              placeholder="Haus 27, Mensa, BaseCamp, MPI …"
+              className="w-full bg-transparent text-[14px] text-ink placeholder:text-ink-3 focus:outline-none"
+              autoComplete="off"
+              spellCheck={false}
+              aria-label="Ziel suchen"
+            />
+            {state.query && (
               <button
-                key={sort}
                 type="button"
-                disabled={sort === 'near' && !live}
-                onClick={() => onChange({ sort })}
-                className={`rounded-full px-2.5 py-1 transition disabled:opacity-35 ${
-                  state.sort === sort ? 'bg-up-500/30 text-white' : 'hover:bg-white/10'
-                }`}
-                title={sort === 'near' && !live ? 'Standortfreigabe nötig' : undefined}
+                onClick={() => onChange({ query: '' })}
+                className="shrink-0 text-ink-3 transition-colors hover:text-ink"
+                aria-label="Suche leeren"
               >
-                {sort === 'name' ? 'A–Z' : 'Nächste'}
+                <Icon path={ICONS.close} size={14} />
               </button>
-            ))}
+            )}
+          </label>
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <span className="truncate text-[11px] text-ink-3">
+              {state.query ? `Treffer für „${state.query}“` : 'Alle Ziele alphabetisch'}
+            </span>
+            <RubberSegment
+              items={[
+                { value: 'name', label: 'A–Z' },
+                { value: 'near', label: 'Nächste' },
+              ]}
+              value={state.sort}
+              onChange={(value) => onChange({ sort: value as 'name' | 'near' })}
+              disabled={!live && state.sort !== 'near'}
+              trackColor="#080e17"
+              thumbColor="#1a2634"
+              textColor="#6e7f94"
+              activeTextColor="#e9eff6"
+              size="sm"
+              radius={3}
+              aria-label="Sortierung"
+            />
           </div>
         </div>
       </div>
 
-      <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
-        {results.length === 0 ? (
-          <div className="px-2 py-10 text-center text-sm text-slate-400">
-            Kein Haus gefunden. Andere Schreibweise versuchen oder Filter zurücksetzen.
+      <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto pb-4">
+        {shown.length === 0 ? (
+          <div className="px-4 py-10 text-center">
+            <p className="text-[13px] text-ink">Kein Ziel gefunden.</p>
+            <p className="pt-1 text-[12px] text-ink-3">
+              Andere Schreibweise versuchen oder{' '}
+              <button
+                type="button"
+                className="underline underline-offset-2"
+                onClick={() => onChange({ query: '', kinds: new Set() })}
+              >
+                Filter zurücksetzen
+              </button>
+              .
+            </p>
           </div>
         ) : (
-          <ul className="space-y-1.5">
-            {results.map((poi) => (
-              <PoiRow
-                key={poi.id}
-                poi={poi}
-                active={selected?.id === poi.id}
-                onSelect={() => onSelect(poi)}
-                onHover={onHover}
-              />
-            ))}
-          </ul>
+          <AnimatedList
+            items={shown.map((poi) => ({
+              id: poi.id,
+              title: poi.short,
+              description: poi.house ? `Haus ${poi.house}` : poi.street,
+            }))}
+            onItemSelect={(_, index) => shown[index] && onSelect(shown[index])}
+            renderItem={(_, index, isSelected) => {
+              const poi = shown[index]
+              return (
+                <Row
+                  active={isSelected || selected?.id === poi.id}
+                  onClick={() => onSelect(poi)}
+                  onHover={() => onHover(poi)}
+                  className="py-2"
+                >
+                  <KindDot kind={poi.kind} />
+                  <span className="min-w-0 flex-1">
+                    <span className="font-display block truncate text-[16px] leading-tight font-semibold text-ink">
+                      {poi.short}
+                    </span>
+                    <span className="block truncate text-[11px] text-ink-3">
+                      {poi.house && <>Haus {poi.house}</>}
+                      {poi.house && poi.street && ', '}
+                      {poi.street}
+                    </span>
+                  </span>
+                </Row>
+              )
+            }}
+            accentColor="#f5b301"
+            theme="dark"
+            width="100%"
+            radius={2}
+            gap={0}
+            maxHeight="none"
+            frame={false}
+            showGradients={false}
+            displayScrollbar={false}
+            selectOnHover={false}
+            className="!w-full !bg-line"
+            style={
+              {
+                '--al-tile': 'var(--color-surface)',
+                '--al-tile-shadow': 'none',
+                '--al-tile-edge': 'transparent',
+                '--al-tile-highlight': 'transparent',
+                '--al-gap': '1px',
+              } as React.CSSProperties
+            }
+          />
         )}
       </div>
     </div>
-  )
-}
-
-function PoiRow({ poi, active, onSelect, onHover }: { poi: Poi; active: boolean; onSelect: () => void; onHover: (p: Poi | null) => void }) {
-  const meta = KINDS[poi.kind]
-  return (
-    <li>
-      <button
-        type="button"
-        onClick={onSelect}
-        onMouseEnter={() => onHover(poi)}
-        onMouseLeave={() => onHover(null)}
-        onFocus={() => onHover(poi)}
-        onBlur={() => onHover(null)}
-        className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition ${
-          active
-            ? 'border-accent-400/60 bg-accent-400/10'
-            : 'border-transparent hover:border-up-400/35 hover:bg-white/5'
-        }`}
-      >
-        <span
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border"
-          style={{ borderColor: `${meta.color}55`, background: `${meta.color}18`, color: meta.color }}
-        >
-          <KindIcon kind={poi.kind} size={17} />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium text-slate-100">{poi.short}</span>
-          <span className="mt-0.5 flex items-center gap-1.5 truncate text-[11px] text-slate-400">
-            {poi.house && <span className="font-mono text-up-300">Haus {poi.house}</span>}
-            {poi.house && poi.street && <span className="opacity-40">·</span>}
-            {poi.street && <span className="truncate">{poi.street}</span>}
-            {!poi.house && !poi.street && <span>{meta.label}</span>}
-          </span>
-        </span>
-        <Icon
-          path={ICONS.target}
-          size={15}
-          className={`shrink-0 transition ${active ? 'text-accent-400' : 'text-slate-600 group-hover:text-up-300'}`}
-        />
-      </button>
-    </li>
   )
 }
 
@@ -217,133 +278,91 @@ export function DestinationPanel({
   error,
 }: DestinationPanelProps) {
   const meta = KINDS[poi.kind]
-  const arrive = route ? formatClock(route.duration) : null
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="px-5 pb-4">
-        <div className="flex items-start gap-3.5">
-          <span
-            className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border"
-            style={{ borderColor: `${meta.color}66`, background: `${meta.color}1a`, color: meta.color }}
-          >
-            <KindIcon kind={poi.kind} size={24} />
-          </span>
+      <div className="px-4 pt-4 pb-3">
+        <div className="flex items-start gap-3">
+          <KindDot kind={poi.kind} size={40} />
           <div className="min-w-0 flex-1">
-            <h2 className="font-display text-xl leading-tight font-semibold text-white">{poi.short}</h2>
-            <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-400">
-              {poi.house && <span className="font-mono text-up-300">Haus {poi.house}</span>}
-              {poi.street && <span>{poi.street}</span>}
-              {poi.area > 0 && <span className="opacity-60">{poi.area.toLocaleString('de-DE')} m²</span>}
+            <h2 className="font-display text-[21px] leading-[1.15] font-semibold text-ink">{poi.short}</h2>
+            <p className="pt-1 text-[12px] text-ink-3">
+              {poi.house && <>Haus {poi.house}</>}
+              {poi.house && poi.street && ', '}
+              {poi.street}
+              {poi.area > 0 && <>, {poi.area.toLocaleString('de-DE')} m²</>}
             </p>
           </div>
           <button
             type="button"
             onClick={onClear}
-            className="rounded-full p-2 text-slate-400 transition hover:bg-white/10 hover:text-white"
+            className="shrink-0 p-1 text-ink-3 transition-colors hover:text-ink"
             aria-label="Auswahl aufheben"
           >
             <Icon path={ICONS.close} size={16} />
           </button>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <KindChip kind={poi.kind} />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 pt-3">
+          <span className="flex items-center gap-1.5 text-[12px]" style={{ color: meta.color }}>
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: meta.color }} />
+            {meta.label}
+          </span>
           {poi.hours && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-slate-300">
-              <Icon path={ICONS.clock} size={12} />
+            <span className="flex items-center gap-1.5 text-[12px] text-ink-2">
+              <Icon path={ICONS.clock} size={13} />
               {poi.hours}
             </span>
           )}
-          {poi.note && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[11px] text-amber-300">
-              <Icon path={ICONS.info} size={12} />
-              {poi.note}
-            </span>
-          )}
+          {poi.note && <span className="text-[12px] text-signal">{poi.note}</span>}
         </div>
       </div>
 
+      <div className="rule-h mx-4" />
+
       {route ? (
-        <RouteSummary route={route} arrive={arrive} />
+        <div className="px-4 pt-3 pb-4">
+          <SectionHead title={live ? 'Route von deinem Standort' : 'Route vom gesetzten Startpunkt'} />
+          <div className="grid grid-cols-3 gap-3">
+            <Reading value={formatDistance(route.distance)} label="Strecke" size="md" />
+            <Reading value={String(Math.max(1, Math.round(route.duration / 60)))} unit="Min" label="Gehzeit" size="md" />
+            <Reading value={String(decisionCount(route))} label="Abbiegungen" size="md" />
+          </div>
+        </div>
       ) : (
-        <div className="mx-5 mb-4 rounded-2xl border border-up-400/20 bg-ink-950/50 px-4 py-3 text-xs text-slate-400">
-          {live
-            ? 'Route wird berechnet …'
-            : 'Standort freigeben, um die Route von hier aus zu berechnen. Ohne Freigabe kannst du einen Startpunkt auf der Karte antippen.'}
+        <div className="px-4 pt-3 pb-4">
+          <Notice tone="info">
+            {live
+              ? loadingRoute
+                ? 'Route wird berechnet …'
+                : 'Route wird beim Auswählen eines Ziels sofort berechnet.'
+              : 'Standort freigeben, um die Route zu berechnen. Ohne Freigabe kannst du einen Startpunkt auf der Karte antippen.'}
+          </Notice>
         </div>
       )}
 
       {error && (
-        <div className="mx-5 mb-3 rounded-xl border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-xs text-rose-200">
-          {error}
+        <div className="px-4 pb-3">
+          <Notice tone="stop">{error}</Notice>
         </div>
       )}
 
-      <div className="mt-auto space-y-2 px-5 pb-5">
+      <div className="mt-auto space-y-2 px-4 pt-2 pb-4">
         {route ? (
           <>
-            <button
-              type="button"
-              onClick={onNavigate}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-up-400 to-up-500 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-up-500/25 transition hover:brightness-110"
-            >
-              <Icon path={ICONS.walk} size={18} />
+            <ActionButton onClick={onNavigate} icon={ICONS.walk}>
               Navigation starten
-            </button>
-            <button
-              type="button"
-              onClick={onStop}
-              className="w-full rounded-2xl border border-up-400/25 px-4 py-2.5 text-sm text-slate-300 transition hover:border-up-400/60 hover:text-white"
-            >
-              Route verwerfen
-            </button>
+            </ActionButton>
+            <PlainButton onClick={onStop}>Route verwerfen</PlainButton>
           </>
         ) : (
           <>
-            <button
-              type="button"
-              onClick={onLocate}
-              disabled={locating || loadingRoute}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-up-400 to-up-500 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-up-500/25 transition hover:brightness-110 disabled:opacity-60"
-            >
-              {loadingRoute ? (
-                <LatticeLoader label="" cellSize={4} gap={2} />
-              ) : (
-                <Icon path={ICONS.locate} size={18} />
-              )}
-              {live ? 'Route berechnen' : 'Standort freigeben & route'}
-            </button>
-            <button
-              type="button"
-              onClick={onClear}
-              className="w-full rounded-2xl border border-up-400/25 px-4 py-2.5 text-sm text-slate-300 transition hover:border-up-400/60 hover:text-white"
-            >
-              Anderes Ziel wählen
-            </button>
+            <ActionButton onClick={onLocate} disabled={locating || loadingRoute} icon={ICONS.locate}>
+              {live ? 'Route berechnen' : 'Standort freigeben'}
+            </ActionButton>
+            <PlainButton onClick={onClear}>Anderes Ziel wählen</PlainButton>
           </>
         )}
       </div>
-    </div>
-  )
-}
-
-function RouteSummary({ route, arrive }: { route: Route; arrive: string | null }) {
-  const decisions = decisionCount(route)
-  return (
-    <div className="mx-5 mb-4 grid grid-cols-3 gap-2">
-      <Metric label="Distanz" value={formatDistance(route.distance)} />
-      <Metric label="Gehzeit" value={formatDuration(route.duration)} />
-      <Metric label="Ankunft" value={arrive ?? '–'} hint={`${decisions} Abbiegungen`} />
-    </div>
-  )
-}
-
-function Metric({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <div className="rounded-2xl border border-up-400/20 bg-ink-950/50 px-3 py-2.5">
-      <div className="text-[10px] tracking-wider text-slate-400 uppercase">{label}</div>
-      <div className="mt-0.5 font-display text-base font-semibold text-white">{value}</div>
-      {hint && <div className="text-[10px] text-slate-500">{hint}</div>}
     </div>
   )
 }
@@ -368,67 +387,82 @@ export function NavPanel({ route, travelled, offRoute, heading, onStop, onRecent
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="px-5 pb-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-[11px] tracking-wider text-slate-400 uppercase">
-            <span className={`h-2 w-2 rounded-full ${offRoute ? 'bg-amber-400' : 'bg-emerald-400'} animate-pulse`} />
-            {offRoute ? 'Abseits der Route' : 'Live-Navigation'}
-          </div>
-          <button
-            type="button"
-            onClick={onStop}
-            className="rounded-full border border-rose-400/30 px-3 py-1 text-[11px] text-rose-200 transition hover:bg-rose-400/15"
-          >
-            Beenden
-          </button>
-        </div>
-
-        <div className="mt-3 flex items-start gap-3.5">
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-accent-400/50 bg-accent-400/15 text-accent-400">
-            <TurnGlyph turn={step.turn} size={30} />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="font-display text-2xl leading-tight font-semibold text-white">
-              {step.turn === 'arrive' ? 'Ankunft' : now ? 'Jetzt' : formatDistance(toTurn)}
-            </div>
-            <div className={`mt-0.5 text-sm ${now ? 'font-medium text-emerald-200' : 'text-slate-200'}`}>{text}</div>
-          </div>
-        </div>
-
-        {offRoute && (
-          <div className="mt-3 rounded-xl border border-amber-400/35 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
-            Du bist neben der Route – sie wird automatisch neu berechnet, sobald du weiter als 40 m abweichst.
-          </div>
-        )}
+      <div className="px-4 pt-4 pb-3">
+        <SectionHead
+          title={offRoute ? 'Abseits der Route' : 'Live-Navigation'}
+          aside={
+            <span className="flex items-center gap-1.5">
+              <StatusMark
+                status={offRoute ? 'failed' : 'running'}
+                size={13}
+                color={offRoute ? '#e05c6e' : '#2fbf71'}
+                doneColor="#2fbf71"
+                errorColor="#e05c6e"
+              />
+              <span className="text-[12px] text-ink-2">{offRoute ? 'wird neu berechnet' : 'Standort aktiv'}</span>
+            </span>
+          }
+        />
       </div>
 
-      <div className="px-5 pb-4">
-        <div className="flex items-end justify-between text-xs text-slate-400">
-          <span>
-            Ziel: <span className="text-slate-200">{route.to.short}</span>
-          </span>
-          <span className="font-mono">{formatDistance(remaining)} · {formatDuration(remaining / 1.42)}</span>
-        </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/8">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-up-300 via-up-400 to-accent-400 transition-[width] duration-500"
-            style={{ width: `${progress * 100}%` }}
+      {/* Die nächste Abbiegung entscheidet die Farbgebung der ganzen Fläche. */}
+      <div
+        className={`mx-4 flex items-center gap-3 border-l-2 py-3 pl-3 ${
+          now ? 'border-go bg-go/8' : 'border-signal bg-signal/6'
+        }`}
+      >
+        <span
+          className={`grid h-12 w-12 shrink-0 place-items-center border ${
+            now ? 'border-go/50 text-go' : 'border-signal/45 text-signal'
+          }`}
+        >
+          <TurnGlyph turn={step.turn} size={26} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <Reading
+            value={step.turn === 'arrive' ? 'Ziel' : now ? 'Jetzt' : formatDistance(toTurn)}
+            label={step.turn === 'arrive' ? undefined : 'Nächster Schritt'}
+            size="md"
+            tone={now ? 'go' : 'signal'}
           />
+          <span className={`block pt-1 text-[13px] ${now ? 'text-go' : 'text-ink'}`}>{text}</span>
+        </span>
+      </div>
+
+      <div className="px-4 pt-4 pb-3">
+        <div className="flex items-end justify-between gap-3">
+          <Reading value={formatDistance(remaining)} label="Bis zum Ziel" size="sm" />
+          <Reading value={String(Math.max(0, Math.round(remaining / WALK_SPEED / 60)))} unit="Min" label="Gehzeit" size="sm" />
+          <Reading value={route.to.short} label="Ziel" size="sm" />
+        </div>
+        <div className="pt-3">
+          <ProgressLine value={progress} />
+          <p className="pt-1.5 text-[11px] text-ink-3">
+            {Math.round(progress * 100)} % geschafft, {decisionCount(route)} Abbiegungen insgesamt
+          </p>
         </div>
       </div>
+
+      {offRoute && (
+        <div className="px-4 pb-3">
+          <Notice tone="warn" actionLabel="Jetzt" onAction={onRecenter}>
+            Du bist neben der Route. Sie wird neu berechnet, sobald du weiter als 40 m abweichst.
+          </Notice>
+        </div>
+      )}
 
       {stepsLeft.length > 0 && (
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-28 sm:pb-24">
-          <div className="mb-2 text-[10px] tracking-wider text-slate-500 uppercase">Nächste Schritte</div>
-          <ol className="space-y-1">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+          <SectionHead title="Danach" />
+          <ol>
             {stepsLeft.slice(0, 8).map((s, i) => (
-              <li key={`${s.index}-${i}`} className="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-white/5">
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-up-400/25 text-up-300">
-                  <TurnGlyph turn={s.turn} size={16} />
+              <li key={`${s.index}-${i}`} className="flex items-center gap-3 border-t border-line py-2 first:border-t-0">
+                <span className="grid h-7 w-7 shrink-0 place-items-center border border-line-2 text-ink-2">
+                  <TurnGlyph turn={s.turn} size={15} />
                 </span>
-                <span className="min-w-0 flex-1 truncate text-xs text-slate-300">{s.text}</span>
-                <span className="shrink-0 font-mono text-[11px] text-slate-500">
-                  {s.turn === 'arrive' ? formatDistance(Math.max(0, route.distance - travelled)) : formatDistance(Math.max(0, s.atDistance - travelled))}
+                <span className="min-w-0 flex-1 truncate text-[12px] text-ink-2">{s.text}</span>
+                <span className="tnum shrink-0 text-[11px] text-ink-3">
+                  {formatDistance(Math.max(0, s.atDistance - travelled))}
                 </span>
               </li>
             ))}
@@ -436,18 +470,31 @@ export function NavPanel({ route, travelled, offRoute, heading, onStop, onRecent
         </div>
       )}
 
-      <div className="mt-auto grid grid-cols-2 gap-2 border-t border-white/8 px-5 py-4">
+      <div className="mt-auto grid grid-cols-2 gap-2 border-t border-line px-4 py-3">
         <Compass heading={heading} />
-        <button
-          type="button"
-          onClick={onRecenter}
-          className={`flex items-center justify-center gap-2 rounded-2xl border px-3 py-2.5 text-xs transition ${
-            following ? 'border-accent-400/60 bg-accent-400/12 text-accent-400' : 'border-up-400/25 text-slate-300 hover:text-white'
-          }`}
+        <PlainButton onClick={onRecenter} active={following}>
+          {following ? 'Karte folgt dir' : 'Zentrieren'}
+        </PlainButton>
+      </div>
+
+      {/* Beenden ist hier die folgenreichste Handlung; sie braucht Absicht,
+          keinen Fehlgriff. */}
+      <div className="px-4 pb-4">
+        <HoldButton
+          size="md"
+          radius={3}
+          backgroundColor="#080e17"
+          fillColor="#e05c6e"
+          textColor="#e05c6e"
+          fillTextColor="#12060a"
+          holdTime={800}
+          onHold={onStop}
+          className="w-full"
+          icon={<Icon path={ICONS.close} size={15} />}
+          doneIcon={<StatusMark status="done" size={15} color="#12060a" doneColor="#12060a" />}
         >
-          <Icon path={ICONS.locate} size={15} />
-          {following ? 'Folgt dir' : 'Zentrieren'}
-        </button>
+          Navigation beenden
+        </HoldButton>
       </div>
     </div>
   )
@@ -455,20 +502,66 @@ export function NavPanel({ route, travelled, offRoute, heading, onStop, onRecent
 
 function Compass({ heading }: { heading: number | null }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-2xl border border-up-400/20 bg-ink-950/50 px-3 py-2">
-      <span
-        className="grid h-8 w-8 place-items-center rounded-full border border-up-400/30 text-up-300 transition-transform duration-300"
-        style={{ transform: `rotate(${heading ?? 0}deg)` }}
-      >
+    <span className="flex items-center gap-2.5 border border-line-2 px-2.5 py-2">
+      <span className="text-ink-3 transition-transform duration-300" style={{ transform: `rotate(${heading ?? 0}deg)` }}>
         <Icon path={ICONS.compass} size={17} />
       </span>
-      <span className="min-w-0">
-        <span className="block text-[10px] tracking-wider text-slate-500 uppercase">Blickrichtung</span>
-        <span className="block font-mono text-xs text-slate-200">
-          {heading === null ? 'kein Kompass' : `${Math.round(heading)}°`}
-        </span>
-      </span>
-    </div>
+      <Reading
+        value={heading === null ? '—' : String(Math.round(heading))}
+        unit={heading === null ? undefined : '°'}
+        label="Blickrichtung"
+        size="sm"
+      />
+    </span>
+  )
+}
+
+/* ------------------------------------------------------------------ buttons */
+
+function ActionButton({
+  children,
+  onClick,
+  icon,
+  disabled,
+}: {
+  children: React.ReactNode
+  onClick: () => void
+  icon: string
+  disabled?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="flex w-full items-center justify-center gap-2 bg-action px-4 py-3 text-[14px] font-semibold text-white transition-colors enabled:hover:bg-action-2 disabled:opacity-50"
+    >
+      <Icon path={icon} size={17} />
+      {children}
+    </button>
+  )
+}
+
+function PlainButton({
+  children,
+  onClick,
+  active,
+  tone,
+}: {
+  children: React.ReactNode
+  onClick: () => void
+  active?: boolean
+  tone?: 'stop'
+}) {
+  const color = tone === 'stop' ? 'text-stop border-stop/40 hover:bg-stop/10' : active ? 'text-signal border-signal/50' : 'text-ink-2 border-line-2 hover:text-ink'
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full items-center justify-center gap-2 border px-4 py-2.5 text-[13px] transition-colors ${color}`}
+    >
+      {children}
+    </button>
   )
 }
 
@@ -483,7 +576,5 @@ const TURN_PATHS: Record<string, string> = {
 }
 
 export function TurnGlyph({ turn, size = 20 }: { turn: keyof typeof TURN_PATHS | string; size?: number }) {
-  return <Icon path={TURN_PATHS[turn] ?? TURN_PATHS.straight} size={size} strokeWidth={1.9} />
+  return <Icon path={TURN_PATHS[turn] ?? TURN_PATHS.straight} size={size} strokeWidth={2} />
 }
-
-export { turnShort }

@@ -12,6 +12,7 @@ export const SOURCE = {
   highlight: 'campus-highlight',
   markers: 'campus-markers',
   user: 'campus-user',
+  accuracy: 'campus-accuracy',
 } as const
 
 export const LAYER = {

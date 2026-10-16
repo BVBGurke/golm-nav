@@ -3,7 +3,7 @@ import { LngLatBounds, Map as MapLibreMap, NavigationControl, ScaleControl, setW
 import type { CampusData, LatLng, Poi, Route } from '@/types'
 import { source } from '@/lib/mapAdapter'
 import { BASEMAP_STYLE, LAYER, SOURCE } from '@/lib/mapStyle'
-import { emptyCollection, polylineToFeature, pointToFeature, type FeatureCollection } from '@/lib/geojson'
+import { circleToFeature, emptyCollection, pointToFeature, polylineToFeature, type FeatureCollection } from '@/lib/geojson'
 import { addCampusLayers } from '@/lib/mapLayers'
 
 /* Vite pre-bundles MapLibre, which hides its worker from the library's own
@@ -20,7 +20,11 @@ interface MapViewProps {
   route: Route | null
   travelled: number
   userPosition: LatLng | null
+  /** Genauigkeit des GPS-Fixes in Metern, null ohne Fix */
+  accuracy: number | null
   follow: boolean
+  /** Kartenmaßstab, gesetzt über die Ausschnittswahl oder den Ring */
+  zoom: number
   onSelectPoi: (poi: Poi) => void
   onMapClick: (point: LatLng) => void
 }
@@ -37,14 +41,15 @@ export default function MapView({
   route,
   travelled,
   userPosition,
+  accuracy,
   follow,
+  zoom,
   onSelectPoi,
   onMapClick,
 }: MapViewProps) {
   const container = useRef<HTMLDivElement>(null)
   const map = useRef<MapLibreMap | null>(null)
   const [ready, setReady] = useState(false)
-  const [zoom, setZoom] = useState(15.4)
   const selectRef = useRef(onSelectPoi)
   const clickRef = useRef(onMapClick)
   selectRef.current = onSelectPoi
@@ -100,7 +105,6 @@ export default function MapView({
       setReady(true)
     })
 
-    instance.on('zoom', () => setZoom(instance.getZoom()))
     instance.addControl(new NavigationControl({ showCompass: false }), 'bottom-right')
     instance.addControl(new ScaleControl({ maxWidth: 96, unit: 'metric' }), 'bottom-left')
 
@@ -147,11 +151,29 @@ export default function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route, travelled, ready])
 
-  /* user pin */
+  /* own position, with the GPS uncertainty drawn to scale */
   useEffect(() => {
-    setData(SOURCE.user, userPosition ? { type: 'FeatureCollection', features: [pointToFeature(userPosition)] } : emptyCollection())
+    setData(
+      SOURCE.user,
+      userPosition ? { type: 'FeatureCollection', features: [pointToFeature(userPosition)] } : emptyCollection(),
+    )
+    setData(
+      SOURCE.accuracy,
+      userPosition && accuracy && accuracy > 8
+        ? { type: 'FeatureCollection', features: [circleToFeature(userPosition, Math.min(accuracy, 120))] }
+        : emptyCollection(),
+    )
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userPosition, ready])
+  }, [userPosition, accuracy, ready])
+
+  /* the scale is set outside the map, so the camera follows that value */
+  useEffect(() => {
+    const instance = map.current
+    if (!instance || !ready) return
+    if (Math.abs(instance.getZoom() - zoom) < 0.05) return
+    instance.easeTo({ zoom, duration: 450 })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoom, ready])
 
   /* outlines of the selected and hovered destination */
   useEffect(() => {
@@ -193,7 +215,7 @@ export default function MapView({
         new LngLatBounds([route.coords[0][1], route.coords[0][0]], [route.coords[0][1], route.coords[0][0]]),
       )
       instance.fitBounds(bounds, {
-        padding: { top: 130, bottom: 250, left: 420, right: 70 },
+        padding: { top: 120, bottom: 210, left: 420, right: 70 },
         duration: 850,
         maxZoom: 17.4,
       })
@@ -216,16 +238,13 @@ export default function MapView({
     <div className="relative h-full w-full">
       <div ref={container} className="h-full w-full" />
       {!ready && (
-        <div className="absolute inset-0 z-10 grid place-items-center bg-ink-950/85">
-          <div className="flex items-center gap-3 rounded-2xl border border-up-400/25 bg-ink-900/90 px-5 py-3 text-sm text-up-300">
-            <span className="h-3 w-3 animate-pulse rounded-full bg-accent-400" />
+        <div className="absolute inset-0 z-10 grid place-items-center bg-base-900">
+          <span className="flex items-center gap-2.5 text-[13px] text-ink-3">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-signal" />
             Campus-Karte wird geladen
-          </div>
+          </span>
         </div>
       )}
-      <div className="pointer-events-none absolute right-3 bottom-3 hidden rounded-full border border-up-400/25 bg-ink-900/75 px-3 py-1 font-mono text-[10px] text-up-300 backdrop-blur sm:block">
-        Zoom {zoom.toFixed(1)} · {pois.length} Ziele
-      </div>
     </div>
   )
 }

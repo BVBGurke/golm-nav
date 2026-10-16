@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import Silk from '@/bits/Silk'
+import BorderGlow from '@/bits/BorderGlow'
+import CometDial from '@/bits/CometDial'
 import CountUp from '@/bits/CountUp'
-import ShinyText from '@/bits/ShinyText'
+import DarkVeil from '@/bits/DarkVeil'
+import Dock from '@/bits/Dock'
+import FadeContent from '@/bits/FadeContent'
+import GlassIcons from '@/bits/GlassIcons'
+import SpecularButton from '@/bits/SpecularButton'
 import SplitText from '@/bits/SplitText'
-import Magnetic from '@/bits/Magnet'
-import GlareHover from '@/bits/GlareHover'
-import PillNav from '@/bits/PillNav'
+import SwipeToast from '@/bits/SwipeToast'
 import MapView from '@/components/MapView'
-import { DestinationPanel, NavPanel, SearchPanel } from '@/components/panels'
-import { ICONS, Icon, KindIcon } from '@/components/ui'
+import { DestinationPanel, NavPanel, SearchPanel, ZOOM_STEPS, type ZoomStep } from '@/components/panels'
+import { ICONS, Icon, ProgressLine, Reading, WALK_SPEED } from '@/components/ui'
 import campusRaw from '@/data/campus.json'
 import poisRaw from '@/data/pois.json'
 import { useLiveLocation, useSmoothedHeading, type LocationState } from '@/hooks/useLiveLocation'
-import { formatDistance, formatDuration, compass } from '@/lib/geo'
+import { formatDistance, formatDuration } from '@/lib/geo'
 import { KINDS, KIND_ORDER } from '@/lib/kinds'
 import { createCampus, decisionCount, lateralOffset, routeTo, type Campus } from '@/lib/routing'
 import type { CampusData, LatLng, Poi, PoiKind, Route } from '@/types'
@@ -20,15 +23,27 @@ import type { CampusData, LatLng, Poi, PoiKind, Route } from '@/types'
 const data = campusRaw as unknown as CampusData
 const allPois = poisRaw.pois as Poi[]
 
+const NAV_ITEMS = [
+  { id: 'karte', label: 'Karte', key: 'k' },
+  { id: 'ziele', label: 'Ziele', key: 'z' },
+  { id: 'route', label: 'Route', key: 'r' },
+] as const
+
 type Mode = 'explore' | 'navigate'
+type Panel = 'ziele' | 'route'
 
 export default function App() {
   const [campus] = useState<Campus>(() => createCampus(data.walk.coords, data.walk.edges, data.walk.roads))
   const [intro, setIntro] = useState(true)
   const [mode, setMode] = useState<Mode>('explore')
+  /* Filter und Suchtext gehören dem Rumpf, nicht dem Einstieg: der
+     Einstiegsknopf setzt sie, das Panel liest sie. */
   const [query, setQuery] = useState('')
   const [kinds, setKinds] = useState<Set<PoiKind>>(new Set())
   const [sort, setSort] = useState<'name' | 'near'>('name')
+  const [zoomStep, setZoomStep] = useState<ZoomStep>('normal')
+  const [dialZoom, setDialZoom] = useState<number>(ZOOM_STEPS[1].zoom)
+  const [panel, setPanel] = useState<Panel>('ziele')
   const [selected, setSelected] = useState<Poi | null>(null)
   const [hovered, setHovered] = useState<Poi | null>(null)
   const [route, setRoute] = useState<Route | null>(null)
@@ -39,12 +54,21 @@ export default function App() {
   const [routeError, setRouteError] = useState<string | null>(null)
   const [computing, setComputing] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(true)
+  const [toastOpen, setToastOpen] = useState(false)
   const lastCompute = useRef(0)
   const live = useLiveLocation()
   useSmoothedHeading(live.heading)
 
   const liveState: LocationState = live
   const hasFix = liveState.status === 'live' && liveState.position !== null
+
+  /* Der Standort ist einmal vorliegen — dann erklärt die App einmal, was mit
+     ihm passiert, und danach nie wieder. */
+  useEffect(() => {
+    if (!hasFix || sessionStorage.getItem('golmnav.location-notice')) return
+    sessionStorage.setItem('golmnav.location-notice', '1')
+    setToastOpen(true)
+  }, [hasFix])
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -57,13 +81,12 @@ export default function App() {
     })
     if (sort === 'near' && origin) {
       const cos = Math.cos((origin[0] * Math.PI) / 180)
-      const m = (p: Poi) => Math.hypot((p.c[0] - origin[0]) * 111320, (p.c[1] - origin[1]) * 111320 * cos)
-      return [...filtered].sort((a, b) => m(a) - m(b))
+      const metres = (p: Poi) => Math.hypot((p.c[0] - origin[0]) * 111320, (p.c[1] - origin[1]) * 111320 * cos)
+      return [...filtered].sort((a, b) => metres(a) - metres(b))
     }
     return filtered
   }, [query, kinds, sort, liveState.position, manualStart])
 
-  /* --------------------------------------------------------- route compute */
   const computeRoute = useCallback(
     (poi: Poi, from?: LatLng) => {
       const origin = from ?? liveState.position ?? manualStart
@@ -93,6 +116,7 @@ export default function App() {
     (poi: Poi) => {
       setSelected(poi)
       setSheetOpen(true)
+      setPanel('route')
       setMode('explore')
       setRoute(null)
       setTravelled(0)
@@ -102,7 +126,6 @@ export default function App() {
     [computeRoute, liveState.position, manualStart],
   )
 
-  /* ------------------------------------------------------- progress + reroute */
   useEffect(() => {
     if (!route || !liveState.position) return
     const { distanceAlong, offset } = lateralOffset(liveState.position, route.coords)
@@ -126,16 +149,23 @@ export default function App() {
   const stopNavigation = useCallback(() => {
     setMode('explore')
     setFollowing(true)
+    setPanel('route')
   }, [])
 
-  const clearAll = useCallback(() => {
+  const showTargets = useCallback(() => {
     setSelected(null)
     setRoute(null)
     setTravelled(0)
     setOffRoute(false)
     setRouteError(null)
     setMode('explore')
+    setPanel('ziele')
   }, [])
+
+  const clearMap = useCallback(() => {
+    showTargets()
+    setSheetOpen(false)
+  }, [showTargets])
 
   const onMapClick = useCallback(
     (point: LatLng) => {
@@ -145,7 +175,6 @@ export default function App() {
     [selected, computeRoute],
   )
 
-  /* keyboard shortcuts */
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
@@ -156,92 +185,169 @@ export default function App() {
       if (event.key === '/') {
         event.preventDefault()
         setSheetOpen(true)
-        document.querySelector<HTMLInputElement>('input[placeholder^="Haus 27"]')?.focus()
+        showTargets()
+        document.querySelector<HTMLInputElement>('input[aria-label="Ziel suchen"]')?.focus()
       }
-      if (event.key === 'Escape') clearAll()
+      if (event.key === 'Escape') clearMap()
       if (event.key === 'l' || event.key === 'L') void live.enable()
+      if (event.key === 'k' || event.key === 'K') setSheetOpen(false)
+      if (event.key === 'z' || event.key === 'Z') { setSheetOpen(true); showTargets() }
+      if (event.key === 'r' || event.key === 'R') { setSheetOpen(true); if (selected) setPanel('route') }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [clearAll, live])
+  }, [clearMap, showTargets, live, selected])
 
   const remaining = route ? Math.max(0, route.distance - travelled) : 0
-  const selectedIsNavActive = mode === 'navigate' && route && selected && route.to.id === selected.id
+  const progress = route && route.distance > 0 ? Math.min(1, travelled / route.distance) : 0
+  const navigating = mode === 'navigate' && route !== null
+
+  /* Der Einstieg endet auf zwei Wegen: Standort freigeben oder eine Kategorie
+     wählen. Beide landen im Zielfilter, der Einstieg selbst verschwindet. */
+  const startWith = (kind: PoiKind | null) => {
+    if (kind) {
+      setPanel('ziele')
+      setKinds(new Set([kind]))
+      setQuery('')
+    } else {
+      void live.enable()
+    }
+    setIntro(false)
+    setSheetOpen(true)
+  }
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-ink-950">
-      <MapView
-        data={data}
-        pois={allPois}
-        selected={selected}
-        hovered={hovered}
-        route={route}
-        travelled={travelled}
-        userPosition={liveState.position}
-        follow={mode === 'navigate' && following}
-        onSelectPoi={selectPoi}
-        onMapClick={onMapClick}
-      />
-
-      <TopBar
-        onLocate={() => void live.enable()}
-        locating={liveState.status === 'requesting'}
-        live={hasFix}
-        onShowList={() => setSheetOpen((v) => !v)}
-        listOpen={sheetOpen}
-      />
-
-      {hasFix && liveState.position && (liveState.status === 'live') && (
-        <div className="pointer-events-none absolute bottom-24 left-4 z-20 sm:bottom-6 sm:left-6">
-          <div className="glass-panel rounded-2xl px-3.5 py-2.5">
-            <div className="text-[10px] tracking-wider text-slate-400 uppercase">Deine Position</div>
-            <div className="mt-0.5 font-mono text-xs text-slate-100">
-              {liveState.position[0].toFixed(5)}, {liveState.position[1].toFixed(5)}
-            </div>
-            <div className="mt-0.5 text-[11px] text-slate-400">
-              ± {Math.round(liveState.accuracy ?? 0)} m
-              {liveState.heading !== null && ` · Blick ${Math.round(liveState.heading)}° ${compass(liveState.heading)}`}
-            </div>
-          </div>
+    <div className="relative h-full w-full overflow-hidden bg-base-900">
+      <header className="absolute inset-x-0 top-0 z-40 flex h-[52px] items-stretch justify-between border-b border-line bg-base-900/85 backdrop-blur-md">
+        <div className="flex min-w-0 items-center gap-2.5 pl-4">
+          <span className="grid h-6 w-6 shrink-0 place-items-center bg-action text-white">
+            <Icon path={ICONS.route} size={14} strokeWidth={2.2} />
+          </span>
+          <span className="min-w-0">
+            <span className="font-display block truncate text-[17px] leading-none font-bold tracking-tight text-ink">
+              GolmNav
+            </span>
+            <span className="block text-[10px] leading-tight text-ink-3">Campus Golm, Universität Potsdam</span>
+          </span>
         </div>
-      )}
 
-      {/* ------------------------------------------------------------- sheet */}
-      <aside
-        className={`pointer-events-none absolute inset-x-0 bottom-0 z-30 sm:inset-y-0 sm:left-0 sm:w-[384px] sm:pt-24 ${
-          sheetOpen ? '' : 'translate-y-[calc(100%-4.5rem)] sm:-translate-x-[calc(100%-4.25rem)] sm:translate-y-0'
-        } transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
-      >
-        <div className="pointer-events-auto flex max-h-[86vh] min-h-[62vh] flex-col sm:h-full sm:max-h-none">
-          <div className="glass-panel mx-2 flex min-h-0 flex-1 flex-col rounded-t-3xl sm:mx-4 sm:mb-4 sm:rounded-3xl">
+        <nav className="hidden items-stretch sm:flex" aria-label="Bereiche">
+          {NAV_ITEMS.map((item) => {
+            const active = item.id === 'karte' ? !sheetOpen : sheetOpen && panel === item.id
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  if (item.id === 'karte') return setSheetOpen(false)
+                  setSheetOpen(true)
+                  if (item.id === 'ziele') return showTargets()
+                  if (selected) setPanel('route')
+                  else showTargets()
+                }}
+                className={`relative px-5 text-[13px] transition-colors ${active ? 'text-ink' : 'text-ink-3 hover:text-ink-2'}`}
+                aria-current={active ? 'page' : undefined}
+              >
+                {item.label}
+                {active && <span className="absolute inset-x-3 bottom-0 h-[2px] bg-signal" />}
+              </button>
+            )
+          })}
+        </nav>
+
+        <div className="flex shrink-0 items-center gap-2 pr-4">
+          {route && (
             <button
               type="button"
-              onClick={() => setSheetOpen((v) => !v)}
-              className="flex items-center justify-between px-5 pt-4 pb-3 text-left sm:hidden"
-              aria-label={sheetOpen ? 'Panel schließen' : 'Panel öffnen'}
+              onClick={() => { setPanel('route'); setSheetOpen(true) }}
+              className="hidden items-center gap-3 border border-line-2 px-3 py-1.5 transition-colors hover:border-line-3 lg:flex"
             >
-              <span className="h-1.5 w-14 rounded-full bg-white/25" />
-              <span className="text-[11px] text-slate-400">{sheetOpen ? 'schließen' : 'öffnen'}</span>
+              <Reading value={formatDistance(remaining)} label="bis zum Ziel" size="sm" />
+              <span className="w-14">
+                <ProgressLine value={progress} />
+              </span>
             </button>
+          )}
+          <button
+            type="button"
+            onClick={() => void live.enable()}
+            aria-label={hasFix ? 'Standort aktiv' : liveState.status === 'requesting' ? 'Standort wird gesucht' : 'Standort freigeben'}
+            className={`flex items-center gap-2 border px-3 py-1.5 text-[12px] transition-colors ${
+              hasFix ? 'border-go/40 text-go' : 'border-line-2 text-ink-2 hover:text-ink'
+            }`}
+          >
+            <Icon path={ICONS.locate} size={15} className={liveState.status === 'requesting' ? 'animate-spin' : ''} />
+            <span className="hidden sm:inline">
+              {hasFix ? 'Standort aktiv' : liveState.status === 'requesting' ? 'Wird gesucht' : 'Standort'}
+            </span>
+          </button>
+        </div>
+      </header>
 
-            <div className="hidden items-center justify-between px-5 pt-5 pb-3 sm:flex">
-              <div>
-                <div className="font-display text-sm tracking-wide text-white">
-                  Campus <span className="text-up-300">Golm</span>
-                </div>
-                <div className="text-[11px] text-slate-400">{allPois.length} Häuser & Ziele</div>
-              </div>
+      <div className="absolute inset-0">
+        <MapView
+          data={data}
+          pois={allPois}
+          selected={selected}
+          hovered={hovered}
+          route={route}
+          travelled={travelled}
+          userPosition={liveState.position}
+          accuracy={liveState.accuracy}
+          follow={navigating && following}
+          zoom={dialZoom}
+          onSelectPoi={selectPoi}
+          onMapClick={onMapClick}
+        />
+      </div>
+
+      {/* Das Panel legt sich über die Karte, statt sie zu verschieben: der
+          Kartenmittelpunkt bleibt beim Öffnen und Schließen stehen. */}
+      <aside
+        className={`absolute inset-x-0 bottom-0 z-30 max-h-[78vh] sm:inset-y-0 sm:top-[52px] sm:left-0 sm:max-h-none sm:w-[400px] ${
+          sheetOpen ? '' : 'translate-y-[calc(100%-3.25rem)] sm:-translate-x-full sm:translate-y-0'
+        } transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]`}
+      >
+        <div className="flex h-full flex-col border-t border-line bg-surface sm:border-t-0 sm:border-r">
+          <button
+            type="button"
+            onClick={() => setSheetOpen((v) => !v)}
+            className="flex items-center justify-between px-4 py-2.5 text-left sm:hidden"
+            aria-label={sheetOpen ? 'Panel schließen' : 'Panel öffnen'}
+          >
+            <span className="h-1 w-10 bg-white/25" />
+            <span className="text-[11px] text-ink-3">{sheetOpen ? 'schließen' : 'Ziele öffnen'}</span>
+          </button>
+
+          <div className="hidden items-center justify-between gap-3 border-b border-line px-4 py-2.5 sm:flex">
+            <span className="min-w-0">
+              <span className="font-display block truncate text-[15px] leading-tight font-semibold text-ink">
+                {panel === 'route' && selected ? 'Ziel' : 'Campus Golm'}
+              </span>
+              <span className="block truncate text-[11px] text-ink-3">
+                {panel === 'route' && selected ? selected.short : `${allPois.length} Häuser & Ziele`}
+              </span>
+            </span>
+            {panel === 'route' && selected && (
               <button
                 type="button"
-                onClick={() => setSheetOpen(false)}
-                className="rounded-full p-2 text-slate-400 transition hover:bg-white/10 hover:text-white"
-                aria-label="Panel einklappen"
+                onClick={showTargets}
+                className="flex shrink-0 items-center gap-1.5 text-[12px] text-ink-3 transition-colors hover:text-ink"
               >
-                <Icon path={ICONS.close} size={16} />
+                <Icon path={ICONS.layers} size={13} />
+                Alle Ziele
               </button>
-            </div>
+            )}
+          </div>
 
-            {selectedIsNavActive && route ? (
+          <FadeContent
+            key={navigating ? 'nav' : panel === 'route' && selected ? 'route' : 'list'}
+            trigger="mount"
+            effect="develop"
+            duration={0.45}
+            className="flex min-h-0 flex-1 flex-col overflow-hidden"
+          >
+            {navigating && route ? (
               <NavPanel
                 route={route}
                 travelled={travelled}
@@ -251,7 +357,7 @@ export default function App() {
                 onRecenter={() => setFollowing((v) => !v)}
                 following={following}
               />
-            ) : selected ? (
+            ) : panel === 'route' && selected ? (
               <DestinationPanel
                 poi={selected}
                 route={route}
@@ -260,8 +366,8 @@ export default function App() {
                 loadingRoute={computing}
                 onNavigate={startNavigation}
                 onStop={() => setRoute(null)}
-                onClear={clearAll}
-                onLocate={() => (hasFix ? selected && computeRoute(selected) : void live.enable())}
+                onClear={showTargets}
+                onLocate={() => (hasFix && selected ? computeRoute(selected) : void live.enable())}
                 error={routeError}
               />
             ) : (
@@ -278,214 +384,300 @@ export default function App() {
                 onHover={setHovered}
                 selected={selected}
                 live={hasFix || manualStart !== null}
+                onShowAll={() => {
+                  setQuery('')
+                  setKinds(new Set())
+                  setZoomStep('weit')
+                  setSheetOpen(false)
+                }}
               />
             )}
-          </div>
+          </FadeContent>
         </div>
       </aside>
 
-      {/* --------------------------------------------------------- nav bottom */}
-      {mode === 'navigate' && route && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center pb-4 sm:pb-6">
-          <div className="glass-panel pointer-events-auto flex items-center gap-4 rounded-2xl px-5 py-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-accent-400/15 text-accent-400">
-              <Icon path={ICONS.walk} size={20} />
+      {navigating && (
+        <div
+          className={`absolute top-[64px] z-20 hidden transition-[left] duration-400 sm:block ${sheetOpen ? 'left-[416px]' : 'left-4'}`}
+        >
+          <BorderGlow
+            glowColor="#f5b301"
+            backgroundColor="#0c141f"
+            borderRadius={3}
+            glowIntensity={0.75}
+            colors={['#f5b301', '#0b4ea2', '#5a9fe0']}
+          >
+            <div className="flex items-center gap-4 px-4 py-3">
+              <CometDial
+                value={dialZoom}
+                onChange={setDialZoom}
+                min={14}
+                max={18.6}
+                step={0.1}
+                label="Kartenmaßstab"
+                accent="#f5b301"
+                ink="#e9eff6"
+                size={76}
+                thickness={6}
+              />
+              <span className="min-w-0">
+                <span className="label-field block">Maßstab</span>
+                <span className="font-display block pt-0.5 text-[15px] font-semibold text-ink">
+                  {ZOOM_STEPS.find((step) => step.id === zoomStep)?.label ?? 'Normal'}
+                </span>
+                <span className="block pt-1 text-[11px] text-ink-3">am Ring drehen</span>
+              </span>
             </div>
-            <div>
-              <div className="font-display text-lg leading-none font-semibold text-white">{formatDistance(remaining)}</div>
-              <div className="text-[11px] text-slate-400">
-                {decisionCount(route)} Abbiegungen · {route.to.short}
-              </div>
-            </div>
-            <div className="hidden h-10 w-px bg-white/10 sm:block" />
-            <div className="hidden sm:block">
-              <div className="font-display text-lg leading-none font-semibold text-white">
-                {formatDuration(remaining / 1.42)}
-              </div>
-              <div className="text-[11px] text-slate-400">Gehgeschwindigkeit 1,4 m/s</div>
-            </div>
-          </div>
+          </BorderGlow>
         </div>
       )}
 
-      {intro && <Intro data={data} onClose={() => setIntro(false)} onLocate={() => { void live.enable(); setIntro(false) }} />}
+      {(!sheetOpen || navigating) && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-9 z-20 hidden justify-center sm:flex">
+          <Dock
+            items={[
+              {
+                icon: <Icon path={ICONS.search} size={17} />,
+                label: 'Ziele',
+                onClick: () => { setSheetOpen(true); showTargets() },
+              },
+              {
+                icon: <Icon path={ICONS.layers} size={17} />,
+                label: `Ausschnitt: ${ZOOM_STEPS.find((s) => s.id === zoomStep)?.label ?? 'Normal'}`,
+                menu: ZOOM_STEPS.map((step) => ({
+                  label: step.label,
+                  onClick: () => setZoomStep(step.id),
+                })),
+              },
+              ...(manualStart
+                ? [
+                    {
+                      icon: <Icon path={ICONS.pinAdd} size={17} />,
+                      label: 'Startpunkt löschen',
+                      active: true,
+                      onClick: () => setManualStart(null),
+                    },
+                  ]
+                : []),
+              {
+                icon: <Icon path={ICONS.locate} size={17} />,
+                label: hasFix ? 'Standort aktiv' : 'Standort freigeben',
+                active: hasFix,
+                onClick: () => void live.enable(),
+              },
+            ]}
+            position="bottom"
+            theme="dark"
+            baseItemSize={40}
+            magnification={56}
+            distance={130}
+            panelHeight={52}
+            roundness={3}
+            accentColor="#f5b301"
+            showLabels
+            showIndicators
+          />
+        </div>
+      )}
+
+      <StatusBar
+        panelOpen={sheetOpen}
+        zoomStep={zoomStep}
+        pois={allPois.length}
+        route={route}
+        remaining={remaining}
+        offRoute={offRoute}
+        accuracy={hasFix ? liveState.accuracy : null}
+      />
+
+      <SwipeToast
+        open={toastOpen}
+        onClose={() => setToastOpen(false)}
+        title="Standort ist aktiv"
+        description="Die Position bleibt auf diesem Gerät. Es gibt keinen Server, an den sie gesendet wird."
+        background="#0c141f"
+        color="#e9eff6"
+        fuseColor="#f5b301"
+        duration={4500}
+        closeButton
+        width={336}
+        radius={4}
+      />
+
+      {intro && <Intro data={data} onDismiss={startWith} />}
     </div>
   )
 }
 
-/* ------------------------------------------------------------------ top bar */
+/* --------------------------------------------------------------- status bar */
 
-function TopBar({
-  onLocate,
-  locating,
-  live,
-  onShowList,
-  listOpen,
+function StatusBar({
+  panelOpen,
+  zoomStep,
+  pois,
+  route,
+  remaining,
+  offRoute,
+  accuracy,
 }: {
-  onLocate: () => void
-  locating: boolean
-  live: boolean
-  onShowList: () => void
-  listOpen: boolean
+  panelOpen: boolean
+  zoomStep: ZoomStep
+  pois: number
+  route: Route | null
+  remaining: number
+  offRoute: boolean
+  accuracy: number | null
 }) {
-  const items = [
-    { label: 'Karte', href: '#karte' },
-    { label: 'Ziele', href: '#ziele' },
-    { label: 'Route', href: '#route' },
-  ]
+  const label = ZOOM_STEPS.find((step) => step.id === zoomStep)?.label ?? 'Normal'
   return (
-    <header className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-start justify-between gap-3 p-4 sm:p-6">
-      <div className="pointer-events-auto flex items-center gap-3">
-        <div className="glass-panel flex items-center gap-3 rounded-2xl py-2.5 pr-4 pl-3">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-up-400 to-up-600 text-white shadow-inner">
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 21.4s6.6-6 6.6-10.6a6.6 6.6 0 1 0-13.2 0C5.4 15.4 12 21.4 12 21.4Z" />
-              <path d="M12 10.6h.01" />
-            </svg>
-          </span>
-          <span>
-            <span className="block font-display text-sm leading-tight font-semibold tracking-wide text-white">
-              Golm<span className="text-up-300">Nav</span>
-            </span>
-            <span className="block text-[10px] tracking-wider text-slate-400 uppercase">Campus Golm · Uni Potsdam</span>
-          </span>
-        </div>
+    <div
+      className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 hidden items-center justify-between gap-4 border-t border-line bg-base-900/80 px-4 py-1.5 backdrop-blur-md sm:flex ${
+        panelOpen ? 'sm:pl-[416px]' : ''
+      }`}
+    >
+      <div className="flex items-center gap-4 truncate">
+        <span className="flex shrink-0 items-center gap-1.5 text-[11px] text-ink-3">
+          <Icon path={ICONS.layers} size={13} />
+          {label}, {pois} Ziele
+        </span>
+        {accuracy !== null && accuracy >= 5 && (
+          <span className="shrink-0 text-[11px] text-ink-3">GPS ± {Math.round(accuracy)} m</span>
+        )}
+        <span className="truncate text-[11px] text-ink-3">
+          Kartendaten OpenStreetMap-Mitwirkende (ODbL), Kacheln CARTO
+        </span>
       </div>
+      {route && (
+        <span className="flex shrink-0 items-center gap-4">
+          <span className="text-[11px] text-ink-3">
+            {decisionCount(route)} Abbiegungen, {formatDuration(remaining / WALK_SPEED)} übrig
+          </span>
+          {offRoute && <span className="text-[11px] font-semibold text-signal">Route wird neu berechnet</span>}
+        </span>
+      )}
+    </div>
+  )
+}
 
-      <div className="pointer-events-auto hidden sm:block">
-        <PillNav
-          items={items}
-          theme="dark"
-          surface="glass"
-          size="sm"
-          highlightColor="#f2b230"
-          highlightTextColor="#04101f"
-          barColor="rgba(6,17,39,0.72)"
-          textColor="#dbe6f5"
-          intro={false}
-          onItemClick={(item) => {
-            if (item.href === '#ziele') onShowList()
-          }}
+/* -------------------------------------------------------------------- intro */
+
+function Intro({ data, onDismiss }: { data: CampusData; onDismiss: (kind: PoiKind | null) => void }) {
+  const facts = useMemo(() => {
+    const pathKm = data.walk.edges.reduce((sum, [, , w]) => sum + w, 0) / 1000
+    return [
+      { label: 'Ziele', value: allPois.length, suffix: '' },
+      { label: 'Gebäudeumrisse', value: data.buildings.length, suffix: '' },
+      { label: 'Wegeknoten im Netz', value: data.walk.coords.length, suffix: '' },
+      { label: 'Fußwege vermessen', value: Math.round(pathKm), suffix: ' km' },
+    ]
+  }, [data])
+
+  const icons = KIND_ORDER.slice(0, 6).map((kind) => ({
+    icon: <Icon path={KINDS[kind].icon} size={22} strokeWidth={1.7} />,
+    color: `linear-gradient(140deg, ${KINDS[kind].color}38, ${KINDS[kind].color}0d)`,
+    label: KINDS[kind].short,
+    onClick: () => onDismiss(kind),
+  }))
+
+  return (
+    <div className="absolute inset-0 z-50 overflow-y-auto bg-base-900">
+      <div className="pointer-events-none absolute inset-0 opacity-60">
+        <DarkVeil
+          color="#0b4ea2"
+          speed={0.4}
+          scale={1.3}
+          flow={0.8}
+          warp={0.25}
+          glow={0.5}
+          grain={0.02}
+          opacity={0.7}
+          intro
         />
       </div>
 
-      <div className="pointer-events-auto flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onShowList}
-          className="glass-panel grid h-11 w-11 place-items-center rounded-2xl text-slate-200 transition hover:text-white sm:hidden"
-          aria-label={listOpen ? 'Liste schließen' : 'Zielliste öffnen'}
-        >
-          <Icon path={listOpen ? ICONS.close : ICONS.search} size={18} />
-        </button>
-        <button
-          type="button"
-          onClick={onLocate}
-          className={`glass-panel flex items-center gap-2 rounded-2xl px-4 py-3 text-xs font-medium transition ${
-            live ? 'text-emerald-300' : 'text-slate-100 hover:text-white'
-          }`}
-        >
-          <Icon path={locating ? ICONS.compass : ICONS.locate} size={16} className={locating ? 'animate-spin' : ''} />
-          <span className="hidden sm:inline">{live ? 'Standort aktiv' : locating ? 'Wird gesucht …' : 'Standort freigeben'}</span>
-        </button>
-      </div>
-    </header>
-  )
-}
+      <div className="relative mx-auto flex min-h-full w-full max-w-[560px] flex-col justify-center px-6 py-14">
+        <p className="flex items-center gap-2.5 text-[11px] font-semibold tracking-[0.08em] text-signal">
+          <span className="h-px w-7 bg-signal" />
+          Campus Golm, Universität Potsdam
+        </p>
 
-/* -------------------------------------------------------------- intro sheet */
+        <h1 className="pt-4 font-display text-[42px] leading-[0.96] font-bold tracking-[-0.015em] text-ink sm:text-[54px]">
+          <SplitText text="Jedes Haus" splitType="words" tag="span" delay={70} duration={0.6} textAlign="left" className="block" />
+          <span className="block text-ink-3">
+            <SplitText text="auf dem Campus." splitType="words" tag="span" delay={160} duration={0.6} textAlign="left" className="block" />
+          </span>
+        </h1>
 
-function Intro({ data, onClose, onLocate }: { data: CampusData; onClose: () => void; onLocate: () => void }) {
-  const buildings = data.buildings.length
-  const graphNodes = data.walk.coords.length
-  const routeKm = useMemo(() => data.walk.edges.reduce((sum, [, , w]) => sum + w, 0) / 1000, [data.walk.edges])
+        <p className="max-w-[46ch] pt-5 text-[14px] leading-relaxed text-ink-2">
+          Institute, Wohnheime, Mensa, Bibliothek, Bahnhof: {allPois.length} Ziele auf echten
+          Gebäudeumrissen. Ziel wählen, Standort freigeben, und die App führt dich zu Fuß bis an die Tür.
+        </p>
 
-  return (
-    <div className="absolute inset-0 z-50 grid place-items-center overflow-y-auto bg-ink-950/70 px-4 py-8 backdrop-blur-md">
-      <div className="absolute inset-0 -z-10 opacity-40">
-        <Silk speed={3.4} scale={1.1} color="#0a2b52" sheenColor="#3a86d9" noiseIntensity={0.9} rotation={0.2} glow={1.1} wave={0.6} paused={false} />
-      </div>
-
-      <div className="glass-panel relative w-full max-w-2xl overflow-hidden rounded-3xl p-7 sm:p-10">
-        <div className="absolute -top-24 -right-24 h-56 w-56 rounded-full bg-up-400/20 blur-3xl" />
-
-        <div className="relative">
-          <div className="flex items-center gap-2 text-[11px] tracking-[0.18em] text-accent-400 uppercase">
-            <Icon path={ICONS.spark} size={14} />
-            Campus-Navigation
-          </div>
-
-          <h1 className="mt-3 font-display text-4xl leading-[1.05] font-semibold text-white sm:text-5xl">
-            <SplitText text="Finde jedes Haus" splitType="words" tag="span" delay={40} duration={0.7} textAlign="left" className="block" />
-            <ShinyText text="auf dem Campus Golm" color="#7cc0f2" shineColor="#ffffff" speed={3.2} className="mt-1 block text-up-300" />
-          </h1>
-
-          <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-300">
-            Alle {allPois.length} Häuser, Institute und Wohnheime auf einer Karte. Ziel auswählen, Standort freigeben
-            und der Campus Golm Navigator führt dich mit Live-Position, Blickrichtung und automatischer Neuberechnung
-            bis an die Tür — Hausnummern, Wohnheime und Forschungscampus inklusive.
-          </p>
-
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat value={allPois.length} label="Ziele" />
-            <Stat value={buildings} label="Gebäude" />
-            <Stat value={graphNodes} label="Wegeknoten" />
-            <Stat value={Math.round(routeKm)} suffix=" km" label="Fußwege" />
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-1.5">
-            {KIND_ORDER.slice(0, 6).map((kind) => (
-              <span
-                key={kind}
-                className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px]"
-                style={{ borderColor: `${KINDS[kind].color}55`, background: `${KINDS[kind].color}14`, color: KINDS[kind].color }}
-              >
-                <KindIcon kind={kind} size={12} />
-                {KINDS[kind].label}
-              </span>
+        <div className="mt-8 border-t border-line pt-4">
+          <span className="label-field">Was in den Daten steckt</span>
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-4 pt-3 sm:grid-cols-4">
+            {facts.map((fact) => (
+              <div key={fact.label}>
+                <dt className="font-display text-[26px] leading-none font-semibold text-ink">
+                  <CountUp to={fact.value} duration={1.2} separator="." suffix={fact.suffix} />
+                </dt>
+                <dd className="pt-1 text-[11px] leading-tight text-ink-3">{fact.label}</dd>
+              </div>
             ))}
-          </div>
-
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Magnetic magnetStrength={0.22} padding={14} className="flex-1">
-              <button
-                type="button"
-                onClick={onLocate}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-up-400 to-up-500 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-up-500/30 transition hover:brightness-110"
-              >
-                <Icon path={ICONS.locate} size={18} />
-                Standort freigeben und starten
-              </button>
-            </Magnetic>
-            <GlareHover borderRadius="1rem" glareColor="#ffffff" glareOpacity={0.22} className="sm:w-auto" background="transparent">
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-full rounded-2xl border border-up-400/30 px-5 py-3.5 text-sm text-slate-200 transition hover:border-up-400/70 hover:text-white"
-              >
-                Erst mal nur umsehen
-              </button>
-            </GlareHover>
-          </div>
-
-          <div className="mt-6 border-t border-white/8 pt-4 text-[11px] leading-relaxed text-slate-500">
-            Kartendaten und Gebäudeumrisse: OpenStreetMap-Mitwirkende (ODbL), Kacheln von CARTO. Wegeberechnung
-            ausschließlich im Browser — keine Anfragen an einen Routing-Dienst, kein API-Key. Eigener Standort
-            verlässt das Gerät nicht.
-          </div>
+          </dl>
         </div>
-      </div>
-    </div>
-  )
-}
 
-function Stat({ value, label, suffix }: { value: number; label: string; suffix?: string }) {
-  return (
-    <div className="rounded-2xl border border-up-400/20 bg-ink-950/40 px-3 py-3">
-      <div className="font-display text-2xl leading-none font-semibold text-white">
-        <CountUp to={value} duration={1.4} separator="." suffix={suffix} />
+        <p className="mt-7 label-field">Kategorie wählen</p>
+        <div className="pt-3">
+          <GlassIcons
+            items={icons}
+            size={56}
+            columns={6}
+            gap={12}
+            roundness={2}
+            refraction={1.4}
+            bevel={0.5}
+            frost={0.2}
+            tint="#0b4ea2"
+            iconColor="#ffffff"
+            labels="always"
+            theme="dark"
+          />
+        </div>
+
+        <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <SpecularButton
+            onClick={() => onDismiss(null)}
+            size="lg"
+            radius={3}
+            thickness={1}
+            tint="#0b4ea2"
+            tintOpacity={1}
+            textColor="#ffffff"
+            lineColor="#7cc0f2"
+            baseColor="#041020"
+            intensity={1.2}
+            idleIntensity={0.3}
+            glow={0.5}
+            followMouse
+            className="flex-1"
+          >
+            Standort freigeben und starten
+          </SpecularButton>
+          <button
+            type="button"
+            onClick={() => onDismiss(null)}
+            className="border border-line-2 px-5 py-3 text-[14px] text-ink-2 transition-colors hover:border-line-3 hover:text-ink"
+          >
+            Erst umsehen
+          </button>
+        </div>
+
+        <p className="pt-6 text-[11px] leading-relaxed text-ink-3">
+          Karten- und Gebäudedaten von OpenStreetMap-Mitwirkenden (ODbL). Die Wegeberechnung läuft im Browser,
+          ohne Routing-Dienst und ohne API-Schlüssel.
+        </p>
       </div>
-      <div className="mt-1 text-[10px] tracking-wider text-slate-400 uppercase">{label}</div>
     </div>
   )
 }

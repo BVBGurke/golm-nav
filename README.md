@@ -59,9 +59,10 @@ Dieselbe App, dieselbe Zielliste, für 390 px Breite.
   Route wird trotzdem berechnet.
 - **Karte ohne Schlüssel.** MapLibre GL mit CARTO-Kacheln, dazu ein eigener Style-Layer für
   Gebäude nach Kategorie, Route, Fortschritt und Marker.
-- **12 Komponenten von [React Bits](https://reactbits.dev).** Silk, SplitText, ShinyText,
-  CountUp, SpotlightCard, GlareHover, Magnet, AnimatedList, LatticeLoader, GlassSurface,
-  PillNav, ScrollReveal – unverändert übernommen und in die Oberfläche eingebettet.
+- **15 Komponenten von [React Bits](https://reactbits.dev).** Jede hat eine Aufgabe:
+  Karten-Dock, Ring für den Maßstab, Halteknopf zum Beenden, Liste, Auswahl, Einstieg.
+  Welche das sind und warum andere wieder ausgebaut wurden, steht in
+  [`docs/architecture.md`](docs/architecture.md).
 
 ## Starten
 
@@ -99,7 +100,8 @@ scripts/
   build_campus.mjs   Fußweg-Graph + Gebäudeumrisse  ->  src/data/campus.json
   dump_places.mjs    benannte POIs aus den Rohdaten  ->  out/pois_raw.json
   build_pois.mjs     kuratierte Zielliste            ->  src/data/pois.json
-  extract_bits.mjs   React-Bits-Komponenten aus der Registry -> src/bits/
+  fetch_bits.mjs     React-Bits-Komponenten aus der Registry holen -> scripts/data/
+  extract_bits.mjs   Komponentenliste -> src/bits/ (+ MANIFEST.json)
 ```
 
 ```bash
@@ -111,6 +113,10 @@ npm run data:build   # baut campus.json und pois.json aus scripts/data/
 Kreuzungspunkte über ihre Koordinaten und zeichnet die Umrisse mit Douglas-Peucker nach,
 damit die Datei klein bleibt. Neue Ziele trägst du in `build_pois.mjs` in `EXTRAS` bzw.
 `OVERRIDES` ein und lässt `npm run data:build` erneut laufen.
+
+`scripts/data/` ist ausdrücklich nicht versioniert: die OSM-Rohdaten (10 MB) und die
+React-Bits-Registrydateien (9 MB) lassen sich mit `npm run data:fetch` und
+`npm run data:bits:fetch` jederzeit neu holen.
 
 ## Aufbau
 
@@ -125,12 +131,16 @@ src/
   lib/graph.ts               Routing-Graph + A* mit Binärheap
   lib/routing.ts             Route, Abbiegehinweise, Abweichungserkennung
   lib/mapLayers.ts           Style-Layer für Gebäude, Route, Marker
-  bits/                      React-Bits-Komponenten (unverändert übernommen)
+  bits/                      React-Bits-Komponenten (15 im Einsatz, Liste im MANIFEST)
   data/                      campus.json und pois.json
 ```
 
 Die Komponenten in `src/bits/` sind 1:1 aus der [React Bits](https://reactbits.dev)-Registry
-(TS+Tailwind-Variante) übernommen und werden über `npm run data:bits` neu eingelesen.
+(TS+Tailwind-Variante) übernommen; `scripts/extract_bits.mjs` spielt sie reproducibly wieder
+ein und schreibt die Auswahl nach `src/bits/MANIFEST.json`.
+
+Wie die Oberfläche aufgebaut ist, welche Farbe was bedeutet und welche Komponenten
+ausprobiert und wieder ausgebaut wurden: [`docs/architecture.md`](docs/architecture.md).
 
 Die Screenshots im README entstehen mit `node docs/capture.mjs`; Details stehen in
 `docs/screens/README.md`.

@@ -1,0 +1,3 @@
+# Rohdaten: mit npm run data:fetch / data:bits neu ziehbar, nicht versioniert.
+*.json
+*.xml

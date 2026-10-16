@@ -1,0 +1,26 @@
+# Komponenten, die in scripts/data/ liegen sollen.
+# Auswahl und Begruendung: src/bits/MANIFEST.json und docs/architecture.md
+AnimatedList
+BorderGlow
+CometDial
+CountUp
+DarkVeil
+Dock
+FadeContent
+GlareHover
+GlassIcons
+GlideSelect
+HoldButton
+LatticeLoader
+Magnet
+Radar
+RubberSegment
+ScrollReveal
+ShinyText
+Silk
+SpecularButton
+SplitText
+SpotlightCard
+StarBorder
+StatusMark
+SwipeToast
