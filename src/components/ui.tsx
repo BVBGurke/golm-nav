@@ -45,12 +45,9 @@ export const ICONS = {
   compass: 'M12 21.2a9.2 9.2 0 1 0 0-18.4 9.2 9.2 0 0 0 0 18.4Z M15.6 8.4l-2 5.2-5.2 2 2-5.2 5.2-2Z',
   clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M12 7.6V12l3.2 2',
   walk: 'M13.4 4.6a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2Z M13.8 8.6 10.6 11l-1.4 4.4 3.6 5.6 M13.8 8.6l3 3 2.6 1 M13.8 8.6l-4.2.6-2.8 3',
-  target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M12 16.6a4.6 4.6 0 1 0 0-9.2 4.6 4.6 0 0 0 0 9.2Z M12 12h.01',
-  chevron: 'M9.5 5.5 16 12l-6.5 6.5',
   layers: 'M12 3.4 3.2 8 12 12.6 20.8 8 12 3.4Z M3.2 12.6 12 17.2l8.8-4.6 M3.2 16.8 12 21.4l8.8-4.6',
   pinAdd: 'M12 21.2s6.6-5.9 6.6-10.6a6.6 6.6 0 0 0-12.4-3 M12 10.4h.01 M5 4.6v6 M2 7.6h6',
   info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M12 11v5.4 M12 7.8h.01',
-  refresh: 'M20.4 12a8.4 8.4 0 1 1-2.6-6.1 M20.4 4.6v5h-5',
 } as const
 
 /* ------------------------------------------------------------------ Kategorien */
@@ -102,17 +99,11 @@ export function Reading({
   value: string
   unit?: string
   label?: string
-  size?: 'sm' | 'md' | 'lg'
-  tone?: 'ink' | 'signal' | 'action' | 'go' | 'stop'
+  size?: 'sm' | 'md'
+  tone?: 'ink' | 'signal' | 'go'
 }) {
-  const scale = { sm: 'text-[17px]', md: 'text-[24px]', lg: 'text-[34px]' }[size]
-  const color = {
-    ink: 'text-ink',
-    signal: 'text-signal',
-    action: 'text-action-2',
-    go: 'text-go',
-    stop: 'text-stop',
-  }[tone]
+  const scale = { sm: 'text-[17px]', md: 'text-[24px]' }[size]
+  const color = { ink: 'text-ink', signal: 'text-signal', go: 'text-go' }[tone]
   return (
     <span className="block min-w-0">
       {label && <span className="label-field block pb-1">{label}</span>}
@@ -125,14 +116,11 @@ export function Reading({
 }
 
 /** Fortschritt als Linie mit gesetztem Segment. */
-export function ProgressLine({ value, tone = 'signal' }: { value: number; tone?: 'signal' | 'action' }) {
+export function ProgressLine({ value }: { value: number }) {
   const clamped = Math.min(1, Math.max(0, value))
   return (
     <div className="h-[3px] w-full bg-white/10">
-      <div
-        className={`h-full transition-[width] duration-500 ease-out ${tone === 'signal' ? 'bg-signal' : 'bg-action-2'}`}
-        style={{ width: `${clamped * 100}%` }}
-      />
+      <div className="h-full bg-signal transition-[width] duration-500 ease-out" style={{ width: `${clamped * 100}%` }} />
     </div>
   )
 }
@@ -200,5 +188,3 @@ export function Row({
     </button>
   )
 }
-
-export { tint }

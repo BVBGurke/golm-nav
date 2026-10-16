@@ -21,7 +21,7 @@ import { KINDS, KIND_ORDER } from '@/lib/kinds'
 import { createCampus, decisionCount, lateralOffset, routeTo, type Campus } from '@/lib/routing'
 import type { CampusData, LatLng, Poi, PoiKind, Route } from '@/types'
 
-const data = campusRaw as unknown as CampusData
+const campusData = campusRaw as unknown as CampusData
 const allPois = poisRaw.pois as Poi[]
 
 const NAV_ITEMS = [
@@ -34,7 +34,7 @@ type Mode = 'explore' | 'navigate'
 type Panel = 'ziele' | 'route'
 
 export default function App() {
-  const [campus] = useState<Campus>(() => createCampus(data.walk.coords, data.walk.edges, data.walk.roads))
+  const [campus] = useState<Campus>(() => createCampus(campusData.walk.coords, campusData.walk.edges, campusData.walk.roads))
   const [intro, setIntro] = useState(true)
   const [mode, setMode] = useState<Mode>('explore')
   const [query, setQuery] = useState('')
@@ -285,7 +285,7 @@ export default function App() {
 
       <div className="absolute inset-0">
         <MapView
-          data={data}
+          data={campusData}
           pois={allPois}
           selected={selected}
           hovered={hovered}
@@ -509,7 +509,7 @@ export default function App() {
         />
       </div>
 
-      {intro && <Intro data={data} onDismiss={startWith} />}
+      {intro && <Intro data={campusData} onDismiss={startWith} />}
     </div>
   )
 }

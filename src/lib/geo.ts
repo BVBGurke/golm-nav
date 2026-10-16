@@ -32,41 +32,9 @@ export function bearingDelta(from: number, to: number): number {
 }
 
 const COMPASS = ['Norden', 'Nordosten', 'Osten', 'Südosten', 'Süden', 'Südwesten', 'Westen', 'Nordwesten']
-const COMPASS_SHORT = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW']
 
 export function compass(deg: number): string {
   return COMPASS[Math.round(((deg % 360) + 360) % 360 / 45) % 8]
-}
-
-export function compassShort(deg: number): string {
-  return COMPASS_SHORT[Math.round(((deg % 360) + 360) % 360 / 45) % 8]
-}
-
-/** Abstand von Punkt p zur Strecke a-b, in Metern. */
-export function distanceToSegment(p: LatLng, a: LatLng, b: LatLng): number {
-  const k = metresPerDegLon((p[0] + a[0] + b[0]) / 3) / M_PER_DEG_LAT
-  const px = p[1] * k
-  const py = p[0]
-  const ax = a[1] * k
-  const ay = a[0]
-  const bx = b[1] * k
-  const by = b[0]
-  const dx = bx - ax
-  const dy = by - ay
-  const len2 = dx * dx + dy * dy
-  const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / len2))
-  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
-}
-
-export function distanceToPath(p: LatLng, path: LatLng[]): number {
-  if (path.length === 0) return Infinity
-  if (path.length === 1) return distance(p, path[0])
-  let best = Infinity
-  for (let i = 0; i + 1 < path.length; i++) {
-    const d = distanceToSegment(p, path[i], path[i + 1])
-    if (d < best) best = d
-  }
-  return best
 }
 
 /** Aufsummierte Meter entlang eines Streckenzugs. */
@@ -78,27 +46,6 @@ export function cumulative(path: LatLng[]): number[] {
 
 export function interpolate(a: LatLng, b: LatLng, t: number): LatLng {
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]
-}
-
-/**
- * Punkt `m` Meter entlang des Wegs, von hinten gezählt wenn `fromEnd` gesetzt
- * ist. Damit bleibt die Marke der nächsten Abbiegung an der Route kleben.
- */
-export function pointAtDistance(path: LatLng[], cum: number[], m: number): { point: LatLng; index: number } {
-  if (path.length === 0) return { point: [0, 0], index: 0 }
-  if (m <= 0) return { point: path[0], index: 0 }
-  const total = cum[cum.length - 1]
-  if (m >= total) return { point: path[path.length - 1], index: path.length - 1 }
-  let lo = 0
-  let hi = cum.length - 1
-  while (lo < hi - 1) {
-    const mid = (lo + hi) >> 1
-    if (cum[mid] <= m) lo = mid
-    else hi = mid
-  }
-  const span = cum[hi] - cum[lo] || 1
-  const t = (m - cum[lo]) / span
-  return { point: interpolate(path[lo], path[hi], t), index: lo }
 }
 
 export function formatDistance(m: number): string {
@@ -114,7 +61,3 @@ export function formatDuration(s: number): string {
   return `${h} Std ${total % 60} Min`
 }
 
-export function formatClock(secondsFromNow: number, now = Date.now()): string {
-  const d = new Date(now + secondsFromNow * 1000)
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
