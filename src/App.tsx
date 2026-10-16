@@ -15,6 +15,7 @@ import { ICONS, Icon, ProgressLine, Reading } from '@/components/ui'
 import campusRaw from '@/data/campus.json'
 import poisRaw from '@/data/pois.json'
 import { useLiveLocation, useSmoothedHeading, type LocationState } from '@/hooks/useLiveLocation'
+import { OFF_ROUTE_M, REROUTE_MS } from '@/lib/navigation'
 import { WALK_SPEED } from '@/lib/walk'
 import { formatDistance, formatDuration } from '@/lib/geo'
 import { KINDS, KIND_ORDER } from '@/lib/kinds'
@@ -129,9 +130,9 @@ export default function App() {
     if (!route || !liveState.position) return
     const { distanceAlong, offset } = lateralOffset(liveState.position, route.coords)
     setTravelled(distanceAlong)
-    const off = Math.abs(offset) > 40
+    const off = Math.abs(offset) > OFF_ROUTE_M
     setOffRoute(off)
-    if (off && Date.now() - lastCompute.current > 6000) {
+    if (off && Date.now() - lastCompute.current > REROUTE_MS) {
       lastCompute.current = Date.now()
       const next = routeTo(campus, liveState.position, route.to)
       if (next) setRoute(next)

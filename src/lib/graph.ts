@@ -1,4 +1,3 @@
-import { WALK_SPEED } from '@/lib/walk'
 import type { LatLng } from '@/types'
 import { M_PER_DEG_LAT, distance } from './geo'
 
@@ -16,7 +15,6 @@ export class WalkGraph {
   private readonly weights: Float64Array
   private readonly cell = 0.0022 // Kachelkante ≈ 245 m
   private readonly grid = new Map<number, number[]>()
-  private readonly maxSpeed = WALK_SPEED
 
   constructor(coords: LatLng[], edges: [number, number, number][]) {
     this.coords = coords
@@ -139,10 +137,6 @@ export class WalkGraph {
     let total = 0
     for (let i = 1; i < path.length; i++) total += distance(this.coords[path[i - 1]], this.coords[path[i]])
     return total
-  }
-
-  get speed(): number {
-    return this.maxSpeed
   }
 
   private gScores = new Float64Array(0)

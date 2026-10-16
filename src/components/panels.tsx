@@ -7,6 +7,7 @@ import GlideSelect from '@/bits/GlideSelect'
 import RubberSegment from '@/bits/RubberSegment'
 import StatusMark from '@/bits/StatusMark'
 import { formatDistance } from '@/lib/geo'
+import { OFF_ROUTE_M } from '@/lib/navigation'
 import { KINDS, KIND_ORDER } from '@/lib/kinds'
 import { decisionCount, guidance, upcomingSteps } from '@/lib/routing'
 import { WALK_SPEED } from '@/lib/walk'
@@ -447,7 +448,7 @@ export function NavPanel({ route, travelled, offRoute, heading, onStop, onRecent
       {offRoute && (
         <div className="px-4 pb-3">
           <Notice tone="warn" actionLabel="Jetzt" onAction={onRecenter}>
-            Du bist neben der Route. Sie wird neu berechnet, sobald du weiter als 40 m abweichst.
+            Du bist neben der Route. Sie wird neu berechnet, sobald du weiter als {OFF_ROUTE_M} m abweichst.
           </Notice>
         </div>
       )}
@@ -576,6 +577,6 @@ const TURN_PATHS: Record<string, string> = {
   arrive: 'M12 21.4s6.4-5.8 6.4-10.4a6.4 6.4 0 1 0-12.8 0C5.6 15.6 12 21.4 12 21.4Z M9.6 11.4l1.8 1.8 3.4-3.6',
 }
 
-export function TurnGlyph({ turn, size = 20 }: { turn: keyof typeof TURN_PATHS | string; size?: number }) {
+function TurnGlyph({ turn, size = 20 }: { turn: keyof typeof TURN_PATHS | string; size?: number }) {
   return <Icon path={TURN_PATHS[turn] ?? TURN_PATHS.straight} size={size} strokeWidth={2} />
 }

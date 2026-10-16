@@ -1,5 +1,6 @@
 import type { LatLng, Poi, Route, RouteStep, Turn } from '@/types'
 import { bearing, bearingDelta, compass, cumulative, distance, formatDistance } from './geo'
+import { WALK_SPEED } from './walk'
 import { WalkGraph } from './graph'
 
 export interface Campus {
@@ -219,7 +220,7 @@ export function routeTo(campus: Campus, from: LatLng, to: Poi, fromNode?: number
     coords,
     cum,
     distance: total,
-    duration: total / graph.speed,
+    duration: total / WALK_SPEED,
     steps,
     from: fromNode !== undefined ? graph.coords[fromNode] : from,
     to,
