@@ -74,7 +74,7 @@ function buildSteps(path: LatLng[], roadAt: (index: number) => string | undefine
   const cum = cumulative(path)
   const total = cum[cum.length - 1]
 
-  /* 1. collect every candidate manoeuvre */
+  /* 1. alle möglichen Abbiegungen sammeln */
   type Candidate = { index: number; delta: number; at: number }
   const candidates: Candidate[] = []
   for (let i = 1; i < path.length - 1; i++) {
@@ -84,7 +84,7 @@ function buildSteps(path: LatLng[], roadAt: (index: number) => string | undefine
     candidates.push({ index: i, delta, at: cum[i] })
   }
 
-  /* 2. a single junction often shows up as several bends — keep the strongest */
+  /* 2. eine Kreuzung erscheint oft als mehrere Knicke; nur der stärkste zählt */
   const decisions: Candidate[] = []
   for (const candidate of candidates) {
     const previous = decisions[decisions.length - 1]
@@ -95,7 +95,7 @@ function buildSteps(path: LatLng[], roadAt: (index: number) => string | undefine
     decisions.push(candidate)
   }
 
-  /* 3. turn them into sentences */
+  /* 3. daraus Sätze machen */
   const steps: RouteStep[] = [
     {
       index: 0,
@@ -128,7 +128,7 @@ function buildSteps(path: LatLng[], roadAt: (index: number) => string | undefine
     atDistance: total,
   })
 
-  /* 4. the distance of a step describes the leg that follows it */
+  /* 4. die Entfernung eines Schritts gehört zum Weg danach */
   for (let i = 0; i < steps.length - 1; i++) {
     steps[i].distance = Math.round(steps[i + 1].atDistance - steps[i].atDistance)
   }

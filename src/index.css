@@ -105,25 +105,6 @@
   }
 }
 
-/* Flächen --------------------------------------------------------------
-   Zwei Ebenen, beide mit Haarlinie statt Schlagschatten: die Karte bleibt
-   die Bühne, die Bedienoberfläche legt sich als Instrument darüber. */
-@utility surface-panel {
-  background: var(--color-surface);
-  border-right: 1px solid var(--color-line);
-}
-
-@utility surface-bar {
-  background: color-mix(in srgb, var(--color-base-900) 86%, transparent);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--color-line);
-}
-
-@utility surface-inset {
-  background: var(--color-base-800);
-  border: 1px solid var(--color-line);
-}
-
 /* Überschrift einer Gruppe: klein, gesperrt, aber nicht in Versalien —
    Versalien für jede Beschriftung ist der schnellste Weg zum Baukasten. */
 @utility label-field {
@@ -174,45 +155,4 @@
 
 .maplibregl-canvas:focus {
   outline: none;
-}
-
-/* Eigene Marker und Linien aus mapLayers.ts ----------------------------- */
-@keyframes golm-pulse {
-  0% {
-    transform: scale(0.6);
-    opacity: 0.95;
-  }
-  70% {
-    transform: scale(2.8);
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-.golm-user-pulse::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-signal) 65%, transparent);
-  animation: golm-pulse 2.6s ease-out infinite;
-}
-
-@keyframes golm-dash {
-  to {
-    stroke-dashoffset: -120;
-  }
-}
-
-.golm-route-dash {
-  animation: golm-dash 3.4s linear infinite;
-}
-
-/* React-Bits-Flächen, die ihre Farbe von uns bekommen. */
-.golm-spectral {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  letter-spacing: 0.01em;
 }

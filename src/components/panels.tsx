@@ -251,7 +251,7 @@ export function SearchPanel({
   )
 }
 
-/* ------------------------------------------------------------------ detail */
+/* ------------------------------------------------------------------ Detail */
 
 interface DestinationPanelProps {
   poi: Poi
@@ -368,7 +368,7 @@ export function DestinationPanel({
   )
 }
 
-/* -------------------------------------------------------------- navigation */
+/* -------------------------------------------------------------- Navigation */
 
 interface NavPanelProps {
   route: Route
@@ -517,7 +517,7 @@ function Compass({ heading }: { heading: number | null }) {
   )
 }
 
-/* ------------------------------------------------------------------ buttons */
+/* ------------------------------------------------------------------ Knöpfe */
 
 function ActionButton({
   children,

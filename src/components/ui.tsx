@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { KINDS } from '@/lib/kinds'
 import type { PoiKind } from '@/types'
 
-/* ------------------------------------------------------------------ icons */
+/* ------------------------------------------------------------------ Icons */
 
 export function Icon({
   path,
@@ -53,7 +53,7 @@ export const ICONS = {
   refresh: 'M20.4 12a8.4 8.4 0 1 1-2.6-6.1 M20.4 4.6v5h-5',
 } as const
 
-/* ------------------------------------------------------------------ kinds */
+/* ------------------------------------------------------------------ Kategorien */
 
 function KindIcon({ kind, size = 16, className }: { kind: PoiKind; size?: number; className?: string }) {
   return <Icon path={KINDS[kind].icon} size={size} className={className} strokeWidth={1.7} />
@@ -80,7 +80,7 @@ export function KindDot({ kind, size = 30 }: { kind: PoiKind; size?: number }) {
   )
 }
 
-/* ----------------------------------------------------------------- shapes */
+/* ----------------------------------------------------------------- Bausteine */
 
 export function SectionHead({ title, aside }: { title: string; aside?: ReactNode }) {
   return (

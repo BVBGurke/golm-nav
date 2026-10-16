@@ -62,15 +62,16 @@ dem Fahrer mehr als der Rest der Fahrt.
 | `Notice` | Hinweis mit Handlung: was los ist und was zu tun ist |
 | `Row` | Zeilenfläche; die aktive Zeile trägt eine Signalkante links |
 | `KindDot` | Kategoriefarbe als Kante und Zeichen, nicht als Fläche |
-| `SegmentRow` | Umschaltung innerhalb einer Zeile |
-| `RubberSegment` | Dieselbe Umschaltung mit gleitender Fläche |
+| `RubberSegment` | Umschaltung innerhalb einer Zeile, gleitende Fläche |
 
 ## Komponenten von React Bits
 
 Herkunft: <https://reactbits.dev>, Registry `reactbits.dev/r/<Name>-TS-TW.json`,
-TS+Tailwind-Variante, unverändert bis auf Pfad-Aliase. Neu holen mit
-`node scripts/fetch_bits.mjs [Name ...]`, einspielen mit
-`node scripts/extract_bits.mjs`.
+TS+Tailwind-Variante, unverändert bis auf Pfad-Aliase. Die Namen stehen in
+`scripts/data/bits.txt`, neu holen mit `npm run data:bits:fetch`, einspielen mit
+`npm run data:bits`. Beide Schritte lesen oder schreiben
+`src/bits/MANIFEST.json`, damit geholte und eingebaute Komponenten nicht
+auseinanderlaufen.
 
 ### Im Einsatz
 

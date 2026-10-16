@@ -137,7 +137,7 @@ export function addCampusLayers(instance: MapLibreMap, data: CampusData, pois: P
     },
   })
 
-  /* destination markers + labels, visible from mid zoom on */
+  /* Zielmarken und Beschriftungen, sichtbar ab mittlerem Maßstab */
   instance.addSource(SOURCE.markers, { type: 'geojson', data: poisToFeatureCollection(pois), promoteId: 'id' })
   instance.addLayer({
     id: LAYER.markers,

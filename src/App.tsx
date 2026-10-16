@@ -514,7 +514,7 @@ export default function App() {
   )
 }
 
-/* --------------------------------------------------------------- status bar */
+/* --------------------------------------------------------------- Statusleiste */
 
 function StatusBar({
   panelOpen,
@@ -564,7 +564,7 @@ function StatusBar({
   )
 }
 
-/* -------------------------------------------------------------------- intro */
+/* -------------------------------------------------------------------- Einstieg */
 
 function Intro({ data, onDismiss }: { data: CampusData; onDismiss: (kind: PoiKind | null) => void }) {
   const facts = useMemo(() => {

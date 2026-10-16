@@ -82,7 +82,7 @@ export function useLiveLocation() {
         const granted = await OrientationCtor.requestPermission()
         if (granted === 'granted') attachOrientation()
       } catch {
-        /* the prompt was dismissed; GPS alone still works */
+        /* Abfrage abgelehnt; GPS allein reicht weiterhin */
       }
     } else {
       attachOrientation()
