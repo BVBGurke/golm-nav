@@ -1,10 +1,10 @@
 /// <reference types="vite/client" />
 
 /**
- * MapLibre resolves its worker relative to its own module URL. Under Vite's
- * dependency pre-bundling that URL is a `.vite/deps` chunk, so the worker can no
- * longer be found and the map stays blank. Copying the shipped worker into the
- * public folder and pointing MapLibre at it fixes both dev and build.
+ * MapLibre löst seinen Worker relativ zur eigenen Moduladresse auf. Unter
+ * Vites Abhängigkeits-Vorbündelung ist das ein Chunk in `.vite/deps`, der
+ * Worker damit unauffindbar und die Karte bleibt leer. Das Plugin kopiert ihn
+ * nach public/ und zeigt MapLibre darauf; das trägt Entwicklung und Build.
  */
 declare module 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url' {
   const url: string

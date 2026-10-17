@@ -2,20 +2,20 @@ export type LatLng = [number, number]
 
 export interface Building {
   id: number
-  /** name, empty when OSM has none */
+  /** Name, leer wenn OSM keinen kennt */
   n: string
-  /** house number */
+  /** Hausnummer */
   h: string
   s: string
-  /** OSM building value */
+  /** Gebäudewert aus OSM */
   t: string
   lv: string
-  /** footprint area in m² */
+  /** Grundfläche in m² */
   a: number
-  /** index into walk.coords, -1 when nothing close enough */
+  /** Index in walk.coords, -1 wenn nichts nah genug liegt */
   g: number
   c: LatLng
-  /** simplified footprint ring */
+  /** vereinfachter Umriss */
   r: LatLng[]
 }
 
@@ -48,19 +48,19 @@ export interface Poi {
   name: string
   short: string
   kind: PoiKind
-  /** official house number, e.g. "27" */
+  /** Hausnummer, etwa „27“ */
   house: string
-  /** "Haus 27" is spoken as a name too */
+  /** „Haus 27“ ist auch ein Name */
   alias: string
   c: LatLng
-  /** walking graph node closest to the entrance */
+  /** Wegeknoten am nächsten zum Eingang */
   node: number
-  /** source building id, 0 for standalone OSM POIs */
+  /** Gebäude-ID, 0 bei eigenständigen OSM-Punkten */
   building: number
   street: string
   hours?: string
   note?: string
-  /** m² of the footprint */
+  /** Grundfläche in m² */
   area: number
   search: string
 }
@@ -73,13 +73,13 @@ export interface RouteStep {
   text: string
   distance: number
   at: LatLng
-  /** travelled distance of the route at this step */
+  /** zurückgelegte Strecke an diesem Schritt */
   atDistance: number
 }
 
 export interface Route {
   coords: LatLng[]
-  /** cumulative metres at each coord */
+  /** aufsummierte Meter an jeder Koordinate */
   cum: number[]
   distance: number
   duration: number
