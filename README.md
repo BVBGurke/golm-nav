@@ -20,14 +20,14 @@ OpenStreetMap. Jedes Ziel ist anklickbar und wird mit Namen und Hausnummer besch
 
 ### Ziel finden und Route bekommen
 
-Die Volltextsuche greift über Name, Hausnummer, Straße und Kategorie. Darunter filtern
-Schaltflächen nach Universität, Forschung, Essen, Lernen, Wohnen, Sport, Service und Verkehr,
-und die Trefferliste lässt sich alphabetisch oder nach Entfernung sortieren.
+Die Volltextsuche greift über Name, Hausnummer, Straße und Kategorie. Darunter grenzt eine
+Auswahlliste auf Universität, Forschung, Essen, Lernen, Wohnen, Sport, Service oder Verkehr
+ein, und die Trefferliste lässt sich alphabetisch oder nach Entfernung sortieren.
 
 ![Suche und Kategoriefilter](docs/screens/03-suche.png)
 
-Nach der Zielwahl steht die Route: Distanz, Gehzeit, Ankunftszeit und die Anzahl der
-Abbiegungen. Der Weg folgt dem echten Fußwegenetz aus OSM, nicht der Luftlinie.
+Nach der Zielwahl steht die Route: Strecke, Gehzeit und die Anzahl der Abbiegungen. Der Weg
+folgt dem echten Fußwegenetz aus OSM, nicht der Luftlinie.
 
 ![Route zum Ziel](docs/screens/04-route.png)
 
@@ -125,7 +125,7 @@ src/
   App.tsx                    Zustand, Suche, Route, Navigationsmodus
   components/MapView.tsx     MapLibre-Karte, Kamera, Klick-Handling
   components/panels.tsx      Zielliste, Ziel-Detail, Live-Navigation
-  components/ui.tsx          Icons und Kategorie-Marker
+  components/ui.tsx          Icons, Zeilen, Zahlen, Hinweise
   hooks/useLiveLocation.ts   GPS, Kompass, Permission-Handling
   lib/geo.ts                 Distanz, Peilung, Formatierung
   lib/graph.ts               Routing-Graph + A* mit Binärheap
