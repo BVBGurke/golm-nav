@@ -119,6 +119,16 @@
   background: var(--color-line);
 }
 
+/* Das Dock liegt in einer Hülle, die Zeigerereignisse durchlässt; das Dock
+   selbst muss sie annehmen, sonst schluckt die Karte jeden Klick darauf. */
+.golm-dock {
+  pointer-events: auto;
+}
+
+.golm-dock::before {
+  pointer-events: none;
+}
+
 /* MapLibre ------------------------------------------------------------- */
 .maplibregl-ctrl-group {
   background: var(--color-surface) !important;

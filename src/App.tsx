@@ -10,13 +10,14 @@ import SpecularButton from '@/bits/SpecularButton'
 import SplitText from '@/bits/SplitText'
 import SwipeToast from '@/bits/SwipeToast'
 import MapView from '@/components/MapView'
-import { DestinationPanel, NavPanel, SearchPanel, ZOOM_STEPS, type ZoomStep } from '@/components/panels'
+import { DestinationPanel, NavPanel, SearchPanel } from '@/components/panels'
 import { ICONS, Icon, ProgressLine, Reading } from '@/components/ui'
 import campusRaw from '@/data/campus.json'
 import poisRaw from '@/data/pois.json'
 import { useLiveLocation, useSmoothedHeading, type LocationState } from '@/hooks/useLiveLocation'
 import { OFF_ROUTE_M, REROUTE_MS } from '@/lib/navigation'
 import { WALK_SPEED } from '@/lib/walk'
+import { ZOOM_STEPS } from '@/lib/zoom'
 import { formatDistance, formatDuration } from '@/lib/geo'
 import { KINDS, KIND_ORDER } from '@/lib/kinds'
 import { createCampus, decisionCount, lateralOffset, routeTo, type Campus } from '@/lib/routing'
@@ -24,6 +25,13 @@ import type { CampusData, LatLng, Poi, PoiKind, Route } from '@/types'
 
 const campusData = campusRaw as unknown as CampusData
 const allPois = poisRaw.pois as Poi[]
+
+/** Der Ring steht zwischen zwei Stufen; die Statusleiste nennt die nächste. */
+function zoomLabel(value: number): string {
+  let nearest: (typeof ZOOM_STEPS)[number] = ZOOM_STEPS[0]
+  for (const step of ZOOM_STEPS) if (Math.abs(step.zoom - value) < Math.abs(nearest.zoom - value)) nearest = step
+  return nearest.label
+}
 
 const NAV_ITEMS = [
   { id: 'karte', label: 'Karte', key: 'k' },
@@ -41,8 +49,7 @@ export default function App() {
   const [query, setQuery] = useState('')
   const [kinds, setKinds] = useState<Set<PoiKind>>(new Set())
   const [sort, setSort] = useState<'name' | 'near'>('name')
-  const [zoomStep, setZoomStep] = useState<ZoomStep>('normal')
-  const [dialZoom, setDialZoom] = useState<number>(ZOOM_STEPS[1].zoom)
+  const [zoom, setZoom] = useState<number>(ZOOM_STEPS[1].zoom)
   const [panel, setPanel] = useState<Panel>('ziele')
   const [selected, setSelected] = useState<Poi | null>(null)
   const [hovered, setHovered] = useState<Poi | null>(null)
@@ -295,7 +302,7 @@ export default function App() {
           userPosition={liveState.position}
           accuracy={liveState.accuracy}
           follow={navigating && following}
-          zoom={dialZoom}
+          zoom={zoom}
           onSelectPoi={selectPoi}
           onMapClick={onMapClick}
         />
@@ -389,7 +396,7 @@ export default function App() {
                 onShowAll={() => {
                   setQuery('')
                   setKinds(new Set())
-                  setZoomStep('weit')
+                  setZoom(ZOOM_STEPS[0].zoom)
                   setSheetOpen(false)
                 }}
               />
@@ -411,8 +418,8 @@ export default function App() {
           >
             <div className="flex items-center gap-4 px-4 py-3">
               <CometDial
-                value={dialZoom}
-                onChange={setDialZoom}
+                value={zoom}
+                onChange={setZoom}
                 min={14}
                 max={18.6}
                 step={0.1}
@@ -425,7 +432,7 @@ export default function App() {
               <span className="min-w-0">
                 <span className="label-field block">Maßstab</span>
                 <span className="font-display block pt-0.5 text-[15px] font-semibold text-ink">
-                  {ZOOM_STEPS.find((step) => step.id === zoomStep)?.label ?? 'Normal'}
+                  {zoomLabel(zoom)}
                 </span>
                 <span className="block pt-1 text-[11px] text-ink-3">am Ring drehen</span>
               </span>
@@ -434,9 +441,12 @@ export default function App() {
         </div>
       )}
 
+      {/* Die Hülle liegt über der ganzen Breite und lässt Zeigerereignisse
+          durch; nur das Dock selbst nimmt sie an. */}
       {(!sheetOpen || navigating) && (
         <div className="pointer-events-none absolute inset-x-0 bottom-9 z-20 hidden justify-center sm:flex">
           <Dock
+            className="golm-dock"
             items={[
               {
                 icon: <Icon path={ICONS.search} size={17} />,
@@ -445,10 +455,10 @@ export default function App() {
               },
               {
                 icon: <Icon path={ICONS.layers} size={17} />,
-                label: `Ausschnitt: ${ZOOM_STEPS.find((s) => s.id === zoomStep)?.label ?? 'Normal'}`,
+                label: `Maßstab: ${zoomLabel(zoom)}`,
                 menu: ZOOM_STEPS.map((step) => ({
                   label: step.label,
-                  onClick: () => setZoomStep(step.id),
+                  onClick: () => setZoom(step.zoom),
                 })),
               },
               ...(manualStart
@@ -484,7 +494,7 @@ export default function App() {
 
       <StatusBar
         panelOpen={sheetOpen}
-        zoomStep={zoomStep}
+        zoom={zoom}
         pois={allPois.length}
         route={route}
         remaining={remaining}
@@ -519,7 +529,7 @@ export default function App() {
 
 function StatusBar({
   panelOpen,
-  zoomStep,
+  zoom,
   pois,
   route,
   remaining,
@@ -527,14 +537,14 @@ function StatusBar({
   accuracy,
 }: {
   panelOpen: boolean
-  zoomStep: ZoomStep
+  zoom: number
   pois: number
   route: Route | null
   remaining: number
   offRoute: boolean
   accuracy: number | null
 }) {
-  const label = ZOOM_STEPS.find((step) => step.id === zoomStep)?.label ?? 'Normal'
+  const label = zoomLabel(zoom)
   return (
     <div
       className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 hidden items-center justify-between gap-4 border-t border-line bg-base-900/80 px-4 py-1.5 backdrop-blur-md sm:flex ${

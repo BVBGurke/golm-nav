@@ -1,5 +1,3 @@
-/* eslint-disable react-refresh/only-export-components -- ZOOM_STEPS teilen sich
-   Panel, Karte und Kopfzeile. */
 import { useEffect, useMemo, useRef } from 'react'
 import AnimatedList from '@/bits/AnimatedList'
 import HoldButton from '@/bits/HoldButton'
@@ -13,15 +11,6 @@ import { decisionCount, guidance, upcomingSteps } from '@/lib/routing'
 import { WALK_SPEED } from '@/lib/walk'
 import type { Poi, PoiKind, Route } from '@/types'
 import { ICONS, Icon, KindDot, Notice, ProgressLine, Reading, Row, SectionHead } from './ui'
-
-/** Weitwinkel, Normal, Fern — dieselben Stufen wie die Zoomknöpfe der Karte. */
-export const ZOOM_STEPS = [
-  { id: 'weit', label: 'Campus', zoom: 14.4 },
-  { id: 'normal', label: 'Gebäude', zoom: 15.9 },
-  { id: 'nah', label: 'Eingang', zoom: 17.4 },
-] as const
-
-export type ZoomStep = (typeof ZOOM_STEPS)[number]['id']
 
 interface SearchState {
   query: string
