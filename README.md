@@ -130,6 +130,8 @@ src/
   lib/geo.ts                 Distanz, Peilung, Formatierung
   lib/graph.ts               Routing-Graph + A* mit Binärheap
   lib/routing.ts             Route, Abbiegehinweise, Abweichungserkennung
+  lib/navigation.ts          Schwellen: 40 m Abweichung, 6 s bis zur Neuberechnung
+  lib/walk.ts                Schrittgeschwindigkeit 1,42 m/s
   lib/mapLayers.ts           Style-Layer für Gebäude, Route, Marker
   bits/                      React-Bits-Komponenten (15 im Einsatz, Liste im MANIFEST)
   data/                      campus.json und pois.json
